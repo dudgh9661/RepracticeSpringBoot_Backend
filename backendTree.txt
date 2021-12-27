@@ -1,0 +1,47 @@
+backend/src
+├── main
+│   ├── java
+│   │   └── com
+│   │       └── yeongho
+│   │           └── book
+│   │               └── springboot
+│   │                   ├── Application.java
+│   │                   ├── config
+│   │                   │   └── WebSecurityConfig.java
+│   │                   ├── domain
+│   │                   │   ├── BaseTimeEntity.java
+│   │                   │   └── posts
+│   │                   │       ├── Posts.java
+│   │                   │       └── PostsRepository.java
+│   │                   ├── service
+│   │                   │   └── posts
+│   │                   │       └── PostsService.java
+│   │                   └── web
+│   │                       ├── HelloController.java
+│   │                       ├── PostsApiController.java
+│   │                       └── dto
+│   │                           ├── HelloResponseDto.java
+│   │                           ├── PostsListResponseDto.java
+│   │                           ├── PostsResponseDto.java
+│   │                           ├── PostsSaveRequestDto.java
+│   │                           └── PostsUpdateRequestDto.java
+│   └── resources
+│       └── application.properties
+└── test
+    └── java
+        └── com
+            └── yeongho
+                └── book
+                    └── springboot
+                        ├── config
+                        │   └── WebSecurityConfigTest.java
+                        ├── domain
+                        │   └── posts
+                        │       └── PostsRepositoryTest.java
+                        └── web
+                            ├── HelloControllerTest.java
+                            ├── PostApiControllerTest.java
+                            └── dto
+                                └── HelloResponseDtoTest.java
+
+25 directories, 19 files
