@@ -1,31 +1,18 @@
 package com.yeongho.book.springboot.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.yeongho.book.springboot.config.WebSecurityConfig;
-import com.yeongho.book.springboot.domain.posts.FileRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
-import com.yeongho.book.springboot.service.posts.PostsService;
-import com.yeongho.book.springboot.web.dto.PostsListResponseDto;
-import com.yeongho.book.springboot.web.dto.PostsSaveRequestDto;
-import com.yeongho.book.springboot.web.dto.PostsUpdateRequestDto;
-import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
@@ -36,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -149,7 +135,7 @@ public class PostApiControllerTest {
         //then
         assertThat(updatedData.get("title")).isEqualTo(post.getTitle());
         assertThat(updatedData.get("content")).isEqualTo(post.getContent());
-        assertThat("updatedImage.png").isEqualTo(post.getFile().getOriginFileName());
+        assertThat("updatedImage.png").isEqualTo(post.getFileItem().getOriginFileName());
     }
 
     @Test
@@ -173,7 +159,9 @@ public class PostApiControllerTest {
 
         Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId));
         //when
-        postsRepository.delete(post);
+        this.mockMvc.perform(delete("/api/v1/posts/" + post.getId()))
+                .andExpect(status().isOk());
+
 
         //then
         assertThatIllegalArgumentException().isThrownBy(() -> postsRepository.findById(postId)

@@ -1,6 +1,6 @@
 package com.yeongho.book.springboot.web.dto;
 
-import com.yeongho.book.springboot.domain.posts.File;
+import com.yeongho.book.springboot.domain.posts.FileItem;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +12,8 @@ public class FileSaveDto {
     private String filePath;
     private Posts posts;
 
-    public File toEntity() {
-        return File.builder()
+    public FileItem toEntity() {
+        return FileItem.builder()
                 .uniqueFileName(uniqueFileName)
                 .originFileName(originFileName)
                 .filePath(filePath)

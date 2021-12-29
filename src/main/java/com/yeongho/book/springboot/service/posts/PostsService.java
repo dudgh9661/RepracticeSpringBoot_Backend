@@ -2,9 +2,10 @@ package com.yeongho.book.springboot.service.posts;
 
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
-import com.yeongho.book.springboot.utils.FileUtils;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ public class PostsService {
 
     private final PostsRepository postsRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FileUtils fileUtils;
+    private final FileService fileService;
 
     @Transactional
     public Long save(PostsSaveRequestDto postsSaveRequestDto, MultipartFile file) throws IOException {
@@ -31,21 +32,21 @@ public class PostsService {
         // 파일명이 존재하는 경우, 파일 엔티티를 생성한다.
         // 해당 파일과 연결된 게시물과 함께 데이터베이스에 저장한다.
         // 게시물을 저장하여 리턴한다.
-        fileUtils.store(file,posts);
+        fileService.store(file,posts);
         return postsRepository.save(posts).getId();
     }
 
     @Transactional
     public Long update(Long id, PostsUpdateRequestDto requestDto, MultipartFile file) throws IOException {
         Posts posts = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id =" + id));
-        fileUtils.update(file, posts);
+        fileService.update(file, posts);
         posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent());
         return id;
     }
 
     public PostsResponseDto findById (Long id) {
-        Posts entity = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
-        return new PostsResponseDto(entity); //entity 객체를 넘겨, PostsResponseDto class에서 이를 가공해 response에 필요한 값들만 뽑아 쓸 것이다.
+        Posts post = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
+        return new PostsResponseDto(post); //entity 객체를 넘겨, PostsResponseDto class에서 이를 가공해 response에 필요한 값들만 뽑아 쓸 것이다.
     }
 
     @Transactional(readOnly = true)
@@ -56,10 +57,16 @@ public class PostsService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id) throws IOException {
         Posts posts = postsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
+        fileService.delete(posts);
         postsRepository.delete(posts);
     }
 
+    public ResponseEntity<Resource> fileDownload(Long id) throws IOException {
+        Posts posts = postsRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
+        return fileService.download(posts.getFileItem());
+    }
 }

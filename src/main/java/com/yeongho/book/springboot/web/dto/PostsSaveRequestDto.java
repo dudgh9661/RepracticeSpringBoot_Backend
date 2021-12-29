@@ -1,6 +1,5 @@
 package com.yeongho.book.springboot.web.dto;
 
-import com.yeongho.book.springboot.domain.posts.File;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import lombok.Builder;
 import lombok.Getter;
