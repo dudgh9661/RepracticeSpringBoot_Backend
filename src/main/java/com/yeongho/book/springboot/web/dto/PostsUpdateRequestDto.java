@@ -15,7 +15,7 @@ public class PostsUpdateRequestDto {
     private String content;
 
     @Builder
-    public PostsUpdateRequestDto(String author, String password, String title, String content, Long fileId) {
+    public PostsUpdateRequestDto(String author, String password, String title, String content) {
         this.author = author;
         this.password = password;
         this.title = title;
