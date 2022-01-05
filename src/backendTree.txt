@@ -1,0 +1,55 @@
+├── main
+│   ├── java
+│   │   └── com
+│   │       └── yeongho
+│   │           └── book
+│   │               └── springboot
+│   │                   ├── Application.java
+│   │                   ├── config
+│   │                   │   ├── SwaggerConfig.java
+│   │                   │   └── WebSecurityConfig.java
+│   │                   ├── domain
+│   │                   │   ├── BaseTimeEntity.java
+│   │                   │   └── posts
+│   │                   │       ├── Comments.java
+│   │                   │       ├── CommentsRepository.java
+│   │                   │       ├── FileItem.java
+│   │                   │       ├── FileRepository.java
+│   │                   │       ├── Posts.java
+│   │                   │       └── PostsRepository.java
+│   │                   ├── service
+│   │                   │   └── posts
+│   │                   │       ├── CommentsService.java
+│   │                   │       ├── FileService.java
+│   │                   │       └── PostsService.java
+│   │                   └── web
+│   │                       ├── CommentsApiController.java
+│   │                       ├── PostsApiController.java
+│   │                       └── dto
+│   │                           ├── CommentsResponseDto.java
+│   │                           ├── CommentsSaveRequestDto.java
+│   │                           ├── CommentsUpdateRequestDto.java
+│   │                           ├── FileResponseDto.java
+│   │                           ├── FileSaveDto.java
+│   │                           ├── PostsListResponseDto.java
+│   │                           ├── PostsResponseDto.java
+│   │                           ├── PostsSaveRequestDto.java
+│   │                           └── PostsUpdateRequestDto.java
+│   └── resources
+│       └── application.properties
+└── test
+    └── java
+        └── com
+            └── yeongho
+                └── book
+                    └── springboot
+                        ├── config
+                        │   └── WebSecurityConfigTest.java
+                        ├── domain
+                        │   └── posts
+                        │       └── PostsRepositoryTest.java
+                        ├── utils
+                        └── web
+                            ├── CommentsApiControllerTest.java
+                            ├── PostApiControllerTest.java
+                            └── dto
