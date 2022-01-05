@@ -32,13 +32,14 @@ public class PostsApiController {
     }
 
     @PostMapping("/api/v1/posts")
-    public Long save(@RequestPart(value="data") PostsSaveRequestDto postsSaveRequestDto, @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
-        return postsService.save(postsSaveRequestDto, file);
+    public Long save(@RequestPart(value="data") PostsSaveRequestDto postsSaveRequestDto, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
+        System.out.println("multipart size :::::: " + files.size());
+        return postsService.save(postsSaveRequestDto, files);
     }
 
     @PutMapping("/api/v1/posts/{id}")
-    public Long update(@PathVariable Long id, @RequestPart(value="data") PostsUpdateRequestDto postsUpdateRequestDto, @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
-        return postsService.update(id, postsUpdateRequestDto, file);
+    public Long update(@PathVariable Long id, @RequestPart(value="data") PostsUpdateRequestDto postsUpdateRequestDto, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
+        return postsService.update(id, postsUpdateRequestDto, files);
     }
 
     @GetMapping("/api/v1/posts/{id}")

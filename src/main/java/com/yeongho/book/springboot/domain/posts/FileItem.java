@@ -29,7 +29,7 @@ public class FileItem {
     @Column
     private String isDeleted;
 
-    @OneToOne
+    @ManyToOne
     private Posts posts;
 
     @Builder
