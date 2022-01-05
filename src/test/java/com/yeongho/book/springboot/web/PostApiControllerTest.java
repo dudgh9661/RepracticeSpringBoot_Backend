@@ -18,8 +18,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,7 @@ public class PostApiControllerTest {
         postsRepository.deleteAll();
     }
 
+    @Transactional
     @Test
     public void 게시물등록() throws Exception {
         //given
@@ -63,12 +66,18 @@ public class PostApiControllerTest {
 
         MockMultipartFile image = new MockMultipartFile("file", "image.png", "image/png",
                 "<<png data>>".getBytes());
+        MockMultipartFile image2 = new MockMultipartFile("file", "image2.png", "image/png",
+                "<<png data>>".getBytes());
+        List<MockMultipartFile> mockMultipartFiles = new ArrayList<>();
+        mockMultipartFiles.add(image);
+        mockMultipartFiles.add(image2);
+
         String content = objectMapper.writeValueAsString(data);
 
         MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
                 content.getBytes(StandardCharsets.UTF_8));
 
-        mockMvc.perform(multipart("/api/v1/posts").file(image).file(json).contentType("multipart/mixed")
+        mockMvc.perform(multipart("/api/v1/posts").file(image).file(image2).file(json).contentType("multipart/mixed")
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk());
 
         //when
@@ -78,8 +87,12 @@ public class PostApiControllerTest {
         assertThat("title").isEqualTo(postsList.get(0).getTitle());
         assertThat("author").isEqualTo(postsList.get(0).getAuthor());
         assertThat("content").isEqualTo(postsList.get(0).getContent());
+        assertThat("image.png").isEqualTo(postsList.get(0).getFileItem().get(0).getOriginFileName());
+        assertThat("image2.png").isEqualTo(postsList.get(0).getFileItem().get(1).getOriginFileName());
     }
+
     @Test
+    @Transactional
     public void 게시물수정() throws Exception {
         //given
         System.out.println("### 게시물 신규 추가");
@@ -97,7 +110,7 @@ public class PostApiControllerTest {
         MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
                 content.getBytes(StandardCharsets.UTF_8));
 
-        Long postId = Long.parseLong(mockMvc.perform(multipart("/api/v1/posts").file(image).file(json).contentType("multipart/mixed")
+        Long postId = Long.parseLong(mockMvc.perform(multipart("/api/v1/posts").file(json).contentType("multipart/mixed")
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
         //when
@@ -111,6 +124,9 @@ public class PostApiControllerTest {
 
         MockMultipartFile updatedImage = new MockMultipartFile("file", "updatedImage.png", "image/png",
                 "<<png data>>".getBytes());
+        MockMultipartFile updatedImage2 = new MockMultipartFile("file", "updatedImage2.png", "image/png",
+                "<<png data>>".getBytes());
+
         String updatedContent = objectMapper.writeValueAsString(updatedData);
 
         MockMultipartFile updatedJson = new MockMultipartFile("data", "jsonData", "application/json",
@@ -127,7 +143,7 @@ public class PostApiControllerTest {
             }
         });
 
-        Long updatedPostId = Long.parseLong(mockMvc.perform(builder.file(updatedImage).file(updatedJson).contentType("multipart/mixed")
+        Long updatedPostId = Long.parseLong(mockMvc.perform(builder.file(updatedJson).contentType("multipart/mixed")
         .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
         Posts post = postsRepository.findById(updatedPostId).orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다." + updatedPostId));
@@ -135,7 +151,9 @@ public class PostApiControllerTest {
         //then
         assertThat(updatedData.get("title")).isEqualTo(post.getTitle());
         assertThat(updatedData.get("content")).isEqualTo(post.getContent());
-        assertThat("updatedImage.png").isEqualTo(post.getFileItem().getOriginFileName());
+        assertThat(post.getFileItem()).isEmpty();
+//        assertThat("updatedImage.png").isEqualTo(post.getFileItem().get(0).getOriginFileName());
+//        assertThat("updatedImage2.png").isEqualTo(post.getFileItem().get(1).getOriginFileName());
     }
 
     @Test

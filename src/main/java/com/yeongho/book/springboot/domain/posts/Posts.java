@@ -9,6 +9,7 @@ import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import java.util.List;
 
 @ToString
 @Getter
@@ -35,8 +36,8 @@ public class Posts extends BaseTimeEntity {
     @Column
     private String isDeleted;
 
-    @OneToOne(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, optional = true)
-    private FileItem fileItem;
+    @OneToMany(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<FileItem> fileItem;
 
     @Builder
     public Posts(String author, String password, String title, String content) {
@@ -64,7 +65,7 @@ public class Posts extends BaseTimeEntity {
         }
     }
 
-    public void saveFile(FileItem uploadFileItem) {
+    public void saveFile(List<FileItem> uploadFileItem) {
         this.fileItem = uploadFileItem;
     }
 }
