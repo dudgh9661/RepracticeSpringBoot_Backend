@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Getter
 @Entity
 @NoArgsConstructor
-public class File {
+public class FileItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,11 +26,14 @@ public class File {
     @Column(nullable = false)
     private String filePath;
 
-    @OneToOne
+    @Column
+    private String isDeleted;
+
+    @ManyToOne
     private Posts posts;
 
     @Builder
-    public File(String uniqueFileName, String originFileName, String filePath) {
+    public FileItem(String uniqueFileName, String originFileName, String filePath) {
         this.uniqueFileName = uniqueFileName;
         this.originFileName = originFileName;
         this.filePath = filePath;

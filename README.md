@@ -21,35 +21,45 @@
 
 ### 프로젝트 구조
 ```
-backend/src
 ├── main
-│   ├── java
-│   │   └── com
-│   │       └── yeongho
-│   │           └── book
-│   │               └── springboot
-│   │                   ├── Application.java
-│   │                   ├── config
-│   │                   │   └── WebSecurityConfig.java
-│   │                   ├── domain
-│   │                   │   ├── BaseTimeEntity.java
-│   │                   │   └── posts
-│   │                   │       ├── Posts.java
-│   │                   │       └── PostsRepository.java
-│   │                   ├── service
-│   │                   │   └── posts
-│   │                   │       └── PostsService.java
-│   │                   └── web
-│   │                       ├── HelloController.java
-│   │                       ├── PostsApiController.java
-│   │                       └── dto
-│   │                           ├── HelloResponseDto.java
-│   │                           ├── PostsListResponseDto.java
-│   │                           ├── PostsResponseDto.java
-│   │                           ├── PostsSaveRequestDto.java
-│   │                           └── PostsUpdateRequestDto.java
-│   └── resources
-│       └── application.properties
+│   ├── java
+│   │   └── com
+│   │       └── yeongho
+│   │           └── book
+│   │               └── springboot
+│   │                   ├── Application.java
+│   │                   ├── config
+│   │                   │   ├── SwaggerConfig.java
+│   │                   │   └── WebSecurityConfig.java
+│   │                   ├── domain
+│   │                   │   ├── BaseTimeEntity.java
+│   │                   │   └── posts
+│   │                   │       ├── Comments.java
+│   │                   │       ├── CommentsRepository.java
+│   │                   │       ├── FileItem.java
+│   │                   │       ├── FileRepository.java
+│   │                   │       ├── Posts.java
+│   │                   │       └── PostsRepository.java
+│   │                   ├── service
+│   │                   │   └── posts
+│   │                   │       ├── CommentsService.java
+│   │                   │       ├── FileService.java
+│   │                   │       └── PostsService.java
+│   │                   └── web
+│   │                       ├── CommentsApiController.java
+│   │                       ├── PostsApiController.java
+│   │                       └── dto
+│   │                           ├── CommentsResponseDto.java
+│   │                           ├── CommentsSaveRequestDto.java
+│   │                           ├── CommentsUpdateRequestDto.java
+│   │                           ├── FileResponseDto.java
+│   │                           ├── FileSaveDto.java
+│   │                           ├── PostsListResponseDto.java
+│   │                           ├── PostsResponseDto.java
+│   │                           ├── PostsSaveRequestDto.java
+│   │                           └── PostsUpdateRequestDto.java
+│   └── resources
+│       └── application.properties
 └── test
     └── java
         └── com
@@ -57,34 +67,13 @@ backend/src
                 └── book
                     └── springboot
                         ├── config
-                        │   └── WebSecurityConfigTest.java
+                        │   └── WebSecurityConfigTest.java
                         ├── domain
-                        │   └── posts
-                        │       └── PostsRepositoryTest.java
+                        │   └── posts
+                        │       └── PostsRepositoryTest.java
+                        ├── utils
                         └── web
-                            ├── HelloControllerTest.java
+                            ├── CommentsApiControllerTest.java
                             ├── PostApiControllerTest.java
                             └── dto
-                                └── HelloResponseDtoTest.java
-                                
-frontend/src
-├── App.vue
-├── components
-│   ├── Board
-│   │   ├── Board.vue
-│   │   ├── BoardEnroll.vue
-│   │   ├── BoardList.vue
-│   │   └── BoardUpdate.vue
-│   ├── HelloWorld.vue
-│   └── Login.vue
-├── main.js
-├── plugins
-│   └── bootstrap-vue.js
-├── router
-│   └── index.js
-├── store.js
-└── views
-    └── Main.vue
-
-
 ```

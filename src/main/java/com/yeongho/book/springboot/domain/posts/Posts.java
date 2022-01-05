@@ -6,14 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @ToString
 @Getter
@@ -37,8 +33,11 @@ public class Posts extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @OneToOne(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, optional = true)
-    private File file;
+    @Column
+    private String isDeleted;
+
+    @OneToMany(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<FileItem> fileItem;
 
     @Builder
     public Posts(String author, String password, String title, String content) {
@@ -66,7 +65,7 @@ public class Posts extends BaseTimeEntity {
         }
     }
 
-    public void saveFile(File uploadFile) {
-        this.file = uploadFile;
+    public void saveFile(List<FileItem> uploadFileItem) {
+        this.fileItem = uploadFileItem;
     }
 }

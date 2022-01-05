@@ -1,6 +1,6 @@
 package com.yeongho.book.springboot.web.dto;
 
-import com.yeongho.book.springboot.domain.posts.File;
+import com.yeongho.book.springboot.domain.posts.FileItem;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,10 +12,10 @@ public class FileResponseDto {
     private String filePath;
 
     @Builder
-    public FileResponseDto (File file) {
-        this.id = file.getId();
-        this.uniqueFileName = file.getUniqueFileName();
-        this.originFileName = file.getOriginFileName();
-        this.filePath = file.getFilePath();
+    public FileResponseDto (FileItem fileItem) {
+        this.id = fileItem.getId();
+        this.uniqueFileName = fileItem.getUniqueFileName();
+        this.originFileName = fileItem.getOriginFileName();
+        this.filePath = fileItem.getFilePath();
     }
 }

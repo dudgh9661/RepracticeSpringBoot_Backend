@@ -1,4 +1,3 @@
-backend/src
 ├── main
 │   ├── java
 │   │   └── com
@@ -7,20 +6,31 @@ backend/src
 │   │               └── springboot
 │   │                   ├── Application.java
 │   │                   ├── config
+│   │                   │   ├── SwaggerConfig.java
 │   │                   │   └── WebSecurityConfig.java
 │   │                   ├── domain
 │   │                   │   ├── BaseTimeEntity.java
 │   │                   │   └── posts
+│   │                   │       ├── Comments.java
+│   │                   │       ├── CommentsRepository.java
+│   │                   │       ├── FileItem.java
+│   │                   │       ├── FileRepository.java
 │   │                   │       ├── Posts.java
 │   │                   │       └── PostsRepository.java
 │   │                   ├── service
 │   │                   │   └── posts
+│   │                   │       ├── CommentsService.java
+│   │                   │       ├── FileService.java
 │   │                   │       └── PostsService.java
 │   │                   └── web
-│   │                       ├── HelloController.java
+│   │                       ├── CommentsApiController.java
 │   │                       ├── PostsApiController.java
 │   │                       └── dto
-│   │                           ├── HelloResponseDto.java
+│   │                           ├── CommentsResponseDto.java
+│   │                           ├── CommentsSaveRequestDto.java
+│   │                           ├── CommentsUpdateRequestDto.java
+│   │                           ├── FileResponseDto.java
+│   │                           ├── FileSaveDto.java
 │   │                           ├── PostsListResponseDto.java
 │   │                           ├── PostsResponseDto.java
 │   │                           ├── PostsSaveRequestDto.java
@@ -38,10 +48,8 @@ backend/src
                         ├── domain
                         │   └── posts
                         │       └── PostsRepositoryTest.java
+                        ├── utils
                         └── web
-                            ├── HelloControllerTest.java
+                            ├── CommentsApiControllerTest.java
                             ├── PostApiControllerTest.java
                             └── dto
-                                └── HelloResponseDtoTest.java
-
-25 directories, 19 files
