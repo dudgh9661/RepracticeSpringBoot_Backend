@@ -63,9 +63,10 @@ public class PostsService {
     }
 
     @Transactional
-    public void delete(Long id) throws IOException {
+    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws IOException {
         Posts posts = postsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
+        posts.correctPassword(postsDeleteDto.getPassword());
         fileService.delete(posts);
         postsRepository.delete(posts);
     }

@@ -4,6 +4,7 @@ import com.yeongho.book.springboot.domain.posts.Comments;
 import com.yeongho.book.springboot.domain.posts.CommentsRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.web.dto.CommentsDeleteDto;
 import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
 import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
 import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
@@ -24,8 +25,9 @@ public class CommentsService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public List<CommentsResponseDto> findAll() {
-        return commentsRepository.findAll().stream()
+    public List<CommentsResponseDto> findAll(Long postId) {
+        Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id = " + postId));
+        return commentsRepository.findAllByPost(post).stream()
                 .map(CommentsResponseDto::new)
                 .collect(Collectors.toList());
     }
@@ -41,17 +43,21 @@ public class CommentsService {
     }
 
     @Transactional
-    public Long update(Long id, CommentsUpdateRequestDto requestDto) {
+    public Long update(Long id, CommentsUpdateRequestDto commentsUpdateRequestDto) {
         Comments comments = commentsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        comments.update(requestDto);
+        comments.update(commentsUpdateRequestDto);
         return id;
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, CommentsDeleteDto commentsDeleteDto) {
         Comments comments = commentsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
+        // 비밀번호 검증
+        if (!comments.correctPassword(commentsDeleteDto.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
         commentsRepository.delete(comments);
     }
 }

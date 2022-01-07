@@ -2,10 +2,7 @@ package com.yeongho.book.springboot.web;
 
 import com.yeongho.book.springboot.service.posts.FileService;
 import com.yeongho.book.springboot.service.posts.PostsService;
-import com.yeongho.book.springboot.web.dto.PostsListResponseDto;
-import com.yeongho.book.springboot.web.dto.PostsResponseDto;
-import com.yeongho.book.springboot.web.dto.PostsSaveRequestDto;
-import com.yeongho.book.springboot.web.dto.PostsUpdateRequestDto;
+import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -48,8 +45,8 @@ public class PostsApiController {
     }
 
     @DeleteMapping("/api/v1/posts/{id}")
-    public Long delete(@PathVariable Long id) throws IOException {
-        postsService.delete(id);
+    public Long delete(@PathVariable Long id, @RequestBody PostsDeleteDto postsDeleteDto) throws IOException {
+        postsService.delete(id, postsDeleteDto);
         return id;
     }
 
