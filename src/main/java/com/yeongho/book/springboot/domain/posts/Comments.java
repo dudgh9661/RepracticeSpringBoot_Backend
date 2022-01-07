@@ -6,6 +6,7 @@ import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
@@ -18,7 +19,7 @@ public class Comments extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 댓글 테이블 PK
 
-    @Column(nullable = false, columnDefinition = "integer default 0")
+    @Column(nullable = true)
     private Long parentId; // 상위 댓글 ID
 
     @ManyToOne
@@ -46,13 +47,21 @@ public class Comments extends BaseTimeEntity {
         WebSecurityConfig webSecurityConfig = new WebSecurityConfig();
         PasswordEncoder passwordEncoder = webSecurityConfig.passwordEncoder();
 
-        if (passwordEncoder.matches(requestDto.getPassword(), this.getPassword())) {
-            System.out.println("댓글 수정 비밀번호 일치");
+        if (correctPassword(requestDto.getPassword())) {
             this.comment = requestDto.getComment();
+        }
+    }
+
+    public boolean correctPassword(String password) {
+        PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
+        if (passwordEncoder.matches(password, this.password)) {
+            System.out.println("댓글 수정 비밀번호 일치");
+            return true;
         } else {
             System.out.println("댓글 수정 비밀번호 불일치");
-            System.out.println("해당 댓글 비밀번호 : " + this.getPassword());
-            System.out.println("Client로부터 받은 비밀번호 : " + requestDto.getPassword());
+            System.out.println("해당 댓글 비밀번호 : " + this.password);
+            System.out.println("Client로부터 받은 비밀번호 : " + password);
+            throw new IllegalStateException("비밀번호가 틀렸습니다");
         }
     }
 }

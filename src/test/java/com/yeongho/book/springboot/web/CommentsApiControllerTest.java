@@ -1,11 +1,15 @@
 package com.yeongho.book.springboot.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.domain.posts.Comments;
 import com.yeongho.book.springboot.domain.posts.CommentsRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
 import com.yeongho.book.springboot.service.posts.CommentsService;
 import com.yeongho.book.springboot.service.posts.PostsService;
+import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
 import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
 import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
 import com.yeongho.book.springboot.web.dto.PostsSaveRequestDto;
@@ -14,22 +18,36 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 public class CommentsApiControllerTest {
 
     @LocalServerPort
@@ -45,18 +63,34 @@ public class CommentsApiControllerTest {
     private CommentsRepository commentsRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private MockMvc mockMvc;
 
     @Autowired
-    private PostsService postsService;
+    private ObjectMapper objectMapper;
 
-    @Autowired
-    private CommentsService commentsService;
-
+    private Posts posts;
     @Before
-    public void beforeClear() {
+    public void beforeClear() throws Exception {
+        System.out.println("### comment Test 초기화 deleteAll() 시작");
         commentsRepository.deleteAll();
         postsRepository.deleteAll();
+        System.out.println("### comment Test 초기화 deleteAll() 종료");
+
+        // 댓글 테스트를 위해 게시글 작성이 선행되어야 한다.
+        Map<String, Object> data = new HashMap<>();
+        data.put("author", "kyh");
+        data.put("password", "1234");
+        data.put("title", "post");
+        data.put("content", "test");
+
+        String content = objectMapper.writeValueAsString(data);
+        MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
+                content.getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/v1/posts").file(json).contentType("multipart/mixed")
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk());
+
+        posts = postsRepository.findAll().get(0);
     }
 
     @After
@@ -65,101 +99,80 @@ public class CommentsApiControllerTest {
         postsRepository.deleteAll();
     }
 
+    @Transactional
     @Test
     public void Comment_등록된다() throws Exception {
         //given
-        // 1. 등록된 post 객체를 가져온다.
-        String password = "1234";
-        String title = "comment등록테스트post";
-        String content = "test";
+        // 0. 게시글을 등록한다.
+        Map<String, Object> data = new HashMap<>();
 
-        PostsSaveRequestDto postsSaveRequestDto = PostsSaveRequestDto.builder()
-                .author("kyh")
-                .password(password)
-                .content(content)
-                .title(title)
-                .build();
-        String url = "http://localhost:" + port + "/api/v1/posts";
-        HttpEntity<PostsSaveRequestDto> postsSaveRequestDtoHttpEntity = new HttpEntity<>(postsSaveRequestDto);
-        ResponseEntity<Long> postsSaveRequestDtoResponseEntity = restTemplate.exchange(url, HttpMethod.POST, postsSaveRequestDtoHttpEntity, Long.class);
-        Long postId = postsSaveRequestDtoResponseEntity.getBody();
-
-        List<Posts> posts = postsRepository.findAll();
-
-        // 2. parentId, posts obj, author, password, comment 작성
-        CommentsSaveRequestDto commentsSaveRequestDto = CommentsSaveRequestDto.builder()
-                .parentId(0L)
-                .postId(postId)
-                .author("kyh")
-                .password("123")
-                .comment("test comment")
-                .build();
         //when
-        url = "http://localhost:" + port + "/api/v1/comments";
-        HttpEntity<CommentsSaveRequestDto> commentsSaveRequestDtoHttpEntity = new HttpEntity<>(commentsSaveRequestDto);
-        ResponseEntity<Long> commentsSaveRequestDtoResponseEntity = restTemplate.exchange(url, HttpMethod.POST, commentsSaveRequestDtoHttpEntity, Long.class);
+        // 2. Comment 저장 요청
+        data.clear();
+        data.put("parentId", 0);
+        data.put("postId", posts.getId());
+        data.put("author", "kyh2");
+        data.put("password", "123");
+        data.put("comment", "test");
+
+        String content = objectMapper.writeValueAsString(data);
+
+        mockMvc.perform(post("/api/v1/comments")
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
+                .andExpect(status().isOk());
 
         //then
-        List<Comments> comments = commentsRepository.findAll();
-        assertThat(comments.get(0).getId()).isGreaterThan(0L);
-        assertThat(comments.get(0).getAuthor()).isEqualTo("kyh");
-        assertThat(passwordEncoder.matches("123", comments.get(0).getPassword())).isEqualTo(true);
-        assertThat(comments.get(0).getComment()).isEqualTo("test comment");
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/comments/" + posts.getId()))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        assertThat(comments.get(0).getPost().getId()).isEqualTo(posts.get(0).getId());
-        assertThat(comments.get(0).getPost().getAuthor()).isEqualTo(posts.get(0).getAuthor());
-        assertThat(comments.get(0).getPost().getPassword()).isEqualTo(posts.get(0).getPassword());
-        assertThat(comments.get(0).getPost().getTitle()).isEqualTo(posts.get(0).getTitle());
-        assertThat(comments.get(0).getPost().getContent()).isEqualTo(posts.get(0).getContent());
+        String result = mvcResult.getResponse().getContentAsString();
+        List<CommentsResponseDto> commentsResponseDto = objectMapper.readValue(result, new TypeReference<List<CommentsResponseDto>>(){});
+        CommentsResponseDto comment = commentsResponseDto.get(0);
+        assertThat(comment.getAuthor()).isEqualTo("kyh2");
+        assertThat(comment.getComment()).isEqualTo("test");
     }
 
     @Test
     public void Comment_수정된다() throws Exception {
         // given
-        // post save
-        String pw = "123";
-        String title = "testTitle";
-        String content = "testContent";
+        // 댓글 저장
+        Map<String, Object> data = new HashMap<>();
+        data.put("parentId", 0);
+        data.put("postId", posts.getId());
+        data.put("author", "kyh2");
+        data.put("password", "123");
+        data.put("comment", "test");
 
-        PostsSaveRequestDto postsSaveRequestDto = PostsSaveRequestDto.builder()
-                .author("kyh")
-                .password(pw)
+        String content = objectMapper.writeValueAsString(data);
+
+        mockMvc.perform(post("/api/v1/comments")
                 .content(content)
-                .title(title)
-                .build();
-        String url = "http://localhost:" + port + "/api/v1/posts";
-        HttpEntity<PostsSaveRequestDto> requestEntity = new HttpEntity<>(postsSaveRequestDto);
-        ResponseEntity<Long> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Long.class);
-
-        Long postId = responseEntity.getBody();
-
-        // comments save
-        CommentsSaveRequestDto commentsSaveRequestDto = CommentsSaveRequestDto.builder()
-                .parentId(0L)
-                .postId(postId)
-                .author("kyh")
-                .password("321")
-                .comment("test Comment")
-                .build();
-        url = "http://localhost:" + port + "/api/v1/comments";
-        HttpEntity<CommentsSaveRequestDto> requestEntityOfCommentsSave = new HttpEntity<>(commentsSaveRequestDto);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntityOfCommentsSave, Long.class);
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
+                .andExpect(status().isOk());
 
         // when
-        url = "http://localhost:" + port + "/api/v1/comments/" + postId;
-        CommentsUpdateRequestDto commentsUpdateRequestDto = CommentsUpdateRequestDto.builder()
-                .password("321")
-                .comment("update success")
-                .build();
-        HttpEntity<CommentsUpdateRequestDto> requestEntityOfCommentsUpdate = new HttpEntity<>(commentsUpdateRequestDto);
-        responseEntity = restTemplate.exchange(url, HttpMethod.PUT, requestEntityOfCommentsUpdate, Long.class);
-        Long commentId = responseEntity.getBody();
-        Comments comments = commentsRepository.findById(commentId).orElseThrow(() -> new IllegalArgumentException("해당 코멘트가 없습니다. comments id = " + commentId));
+        // 댓글 수정
+        Map<String, Object> updatedData = new HashMap<>();
+        updatedData.put("password", "123");
+        updatedData.put("comment", "updatedComment");
 
+        content = objectMapper.writeValueAsString(updatedData);
+        MvcResult mvcResult = mockMvc.perform(put("/api/v1/comments/" + posts.getId())
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
+                .andExpect(status().isOk())
+                .andReturn();
+        Long commentsId = Long.parseLong(mvcResult.getResponse().getContentAsString());
+        Comments comments = commentsRepository.findById(commentsId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다. id : "+ commentsId));
 
         // then
-        assertThat("update success").isEqualTo(comments.getComment());
-        assertThat(passwordEncoder.matches("321", comments.getPassword())).isEqualTo(true);
+        assertThat(comments.getComment()).isEqualTo("updatedComment");
     }
 
 
@@ -167,44 +180,41 @@ public class CommentsApiControllerTest {
     public void Comment_삭제된다() throws Exception {
         // given
         // post save
-        String pw = "123";
-        String title = "testTitle";
-        String content = "testContent";
-
-        PostsSaveRequestDto postsSaveRequestDto = PostsSaveRequestDto.builder()
-                .author("kyh")
-                .password(pw)
-                .content(content)
-                .title(title)
-                .build();
-        String url = "http://localhost:" + port + "/api/v1/posts";
-        HttpEntity<PostsSaveRequestDto> requestEntity = new HttpEntity<>(postsSaveRequestDto);
-        ResponseEntity<Long> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Long.class);
-
-        Long postId = responseEntity.getBody();
-
         // comments save
-        CommentsSaveRequestDto commentsSaveRequestDto = CommentsSaveRequestDto.builder()
-                .parentId(0L)
-                .postId(postId)
-                .author("kyh")
-                .password("321")
-                .comment("test Comment")
-                .build();
-        url = "http://localhost:" + port + "/api/v1/comments";
-        HttpEntity<CommentsSaveRequestDto> requestEntityOfCommentsSave = new HttpEntity<>(commentsSaveRequestDto);
-        responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntityOfCommentsSave, Long.class);
-        Long commentId = responseEntity.getBody();
+        Map<String, Object> data = new HashMap<>();
+        data.put("parentId", 0);
+        data.put("postId", posts.getId());
+        data.put("author", "kyh2");
+        data.put("password", "123");
+        data.put("comment", "commentDeleteTest");
+
+        String content = objectMapper.writeValueAsString(data);
+
+        String commentStrId = mockMvc.perform(post("/api/v1/comments")
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        Long commentId = Long.parseLong(commentStrId);
 
         // when
-        url = "http://localhost:" + port + "/api/v1/comments/" + commentId;
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity entity = new HttpEntity(headers);
-        responseEntity = restTemplate.exchange(url, HttpMethod.DELETE, entity, Long.class);
-
+        data.clear();
+        data.put("password", "123");
+        content = objectMapper.writeValueAsString(data);
+        mockMvc.perform(delete("/api/v1/comments/"  + commentId)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
+                .andExpect(status().isOk());
 
         // then
-        assertThat(commentsRepository.findById(commentId))
-                .isEmpty();
+        String result = mockMvc.perform(get("/api/v1/comments/" + posts.getId())).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<CommentsResponseDto> responseData = objectMapper.readValue(result, new TypeReference<List<CommentsResponseDto>>(){});
+
+        assertThat(responseData).isEmpty();
     }
 }

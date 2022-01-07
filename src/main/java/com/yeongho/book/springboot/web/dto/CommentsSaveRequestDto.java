@@ -5,11 +5,14 @@ import com.yeongho.book.springboot.domain.posts.Posts;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+@Setter
 @Getter
 @NoArgsConstructor
 public class CommentsSaveRequestDto {
-
     private Long parentId;
     private Long postId;
     private String author;
