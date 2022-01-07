@@ -177,7 +177,15 @@ public class PostApiControllerTest {
 
         Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId));
         //when
-        this.mockMvc.perform(delete("/api/v1/posts/" + post.getId()))
+
+        data.clear();
+        data.put("password", "123");
+        content = objectMapper.writeValueAsString(data);
+
+        this.mockMvc.perform(delete("/api/v1/posts/" + post.getId())
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
                 .andExpect(status().isOk());
 
 
