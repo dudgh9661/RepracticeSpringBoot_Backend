@@ -182,7 +182,7 @@ public class PostApiControllerTest {
         data.put("password", "123");
         content = objectMapper.writeValueAsString(data);
 
-        this.mockMvc.perform(delete("/api/v1/posts/" + post.getId())
+        this.mockMvc.perform(post("/api/v1/posts/" + post.getId())
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))

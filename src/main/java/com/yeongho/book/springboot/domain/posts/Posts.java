@@ -2,10 +2,13 @@ package com.yeongho.book.springboot.domain.posts;
 
 import com.yeongho.book.springboot.config.WebSecurityConfig;
 import com.yeongho.book.springboot.domain.BaseTimeEntity;
+import com.yeongho.book.springboot.web.dto.PostsDeleteDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
@@ -14,6 +17,8 @@ import java.util.List;
 @ToString
 @Getter
 @NoArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 @Entity
 public class Posts extends BaseTimeEntity {
 
@@ -32,9 +37,6 @@ public class Posts extends BaseTimeEntity {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
-
-    @Column
-    private String isDeleted;
 
     @OneToMany(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<FileItem> fileItem;

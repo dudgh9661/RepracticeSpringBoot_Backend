@@ -1,18 +1,12 @@
 package com.yeongho.book.springboot.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.domain.posts.Comments;
 import com.yeongho.book.springboot.domain.posts.CommentsRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
-import com.yeongho.book.springboot.service.posts.CommentsService;
-import com.yeongho.book.springboot.service.posts.PostsService;
 import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
-import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
-import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
-import com.yeongho.book.springboot.web.dto.PostsSaveRequestDto;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,15 +17,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -42,7 +31,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -109,11 +97,11 @@ public class CommentsApiControllerTest {
         //when
         // 2. Comment 저장 요청
         data.clear();
-        data.put("parentId", 0);
+        data.put("parentId", "0");
         data.put("postId", posts.getId());
         data.put("author", "kyh2");
         data.put("password", "123");
-        data.put("comment", "test");
+        data.put("text", "test");
 
         String content = objectMapper.writeValueAsString(data);
 
@@ -132,7 +120,7 @@ public class CommentsApiControllerTest {
         List<CommentsResponseDto> commentsResponseDto = objectMapper.readValue(result, new TypeReference<List<CommentsResponseDto>>(){});
         CommentsResponseDto comment = commentsResponseDto.get(0);
         assertThat(comment.getAuthor()).isEqualTo("kyh2");
-        assertThat(comment.getComment()).isEqualTo("test");
+        assertThat(comment.getText()).isEqualTo("test");
     }
 
     @Test
@@ -144,7 +132,7 @@ public class CommentsApiControllerTest {
         data.put("postId", posts.getId());
         data.put("author", "kyh2");
         data.put("password", "123");
-        data.put("comment", "test");
+        data.put("text", "test");
 
         String content = objectMapper.writeValueAsString(data);
 
@@ -158,7 +146,7 @@ public class CommentsApiControllerTest {
         // 댓글 수정
         Map<String, Object> updatedData = new HashMap<>();
         updatedData.put("password", "123");
-        updatedData.put("comment", "updatedComment");
+        updatedData.put("text", "updatedComment");
 
         content = objectMapper.writeValueAsString(updatedData);
         MvcResult mvcResult = mockMvc.perform(put("/api/v1/comments/" + posts.getId())
@@ -172,7 +160,7 @@ public class CommentsApiControllerTest {
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다. id : "+ commentsId));
 
         // then
-        assertThat(comments.getComment()).isEqualTo("updatedComment");
+        assertThat(comments.getText()).isEqualTo("updatedComment");
     }
 
 
@@ -186,7 +174,7 @@ public class CommentsApiControllerTest {
         data.put("postId", posts.getId());
         data.put("author", "kyh2");
         data.put("password", "123");
-        data.put("comment", "commentDeleteTest");
+        data.put("text", "commentDeleteTest");
 
         String content = objectMapper.writeValueAsString(data);
 
@@ -203,7 +191,7 @@ public class CommentsApiControllerTest {
         data.clear();
         data.put("password", "123");
         content = objectMapper.writeValueAsString(data);
-        mockMvc.perform(delete("/api/v1/comments/"  + commentId)
+        mockMvc.perform(post("/api/v1/comments/"  + commentId)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
@@ -214,7 +202,6 @@ public class CommentsApiControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         List<CommentsResponseDto> responseData = objectMapper.readValue(result, new TypeReference<List<CommentsResponseDto>>(){});
-
-        assertThat(responseData).isEmpty();
+        assertThat(responseData.get(0).getIsDeleted()).isEqualTo(true);
     }
 }
