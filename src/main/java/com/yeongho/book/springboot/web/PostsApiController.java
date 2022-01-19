@@ -44,7 +44,7 @@ public class PostsApiController {
         return postsService.findById(id);
     }
 
-    @DeleteMapping("/api/v1/posts/{id}")
+    @PostMapping("/api/v1/posts/{id}")
     public Long delete(@PathVariable Long id, @RequestBody PostsDeleteDto postsDeleteDto) throws IOException {
         postsService.delete(id, postsDeleteDto);
         return id;

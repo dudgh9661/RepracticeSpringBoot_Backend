@@ -9,6 +9,7 @@ import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
 import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
 import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +36,7 @@ public class CommentsService {
     @Transactional
     public Long save(CommentsSaveRequestDto commentsSaveRequestDto) {
         // 1. 댓글을 다는 게시물의 Posts 객체를 불러온다.
-        Long postId = commentsSaveRequestDto.getPostId();
+        Long postId = Long.parseLong(commentsSaveRequestDto.getPostId());
         Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
         // 2. 불러온 post 객체를 FK로 이용해 Comment data를 저장한다.
         commentsSaveRequestDto.setPasswordEncoding(passwordEncoder.encode(commentsSaveRequestDto.getPassword())); // pw 암호화
@@ -43,21 +44,17 @@ public class CommentsService {
     }
 
     @Transactional
-    public Long update(Long id, CommentsUpdateRequestDto commentsUpdateRequestDto) {
-        Comments comments = commentsRepository.findById(id)
+    public Long update(Long commentId, CommentsUpdateRequestDto commentsUpdateRequestDto) {
+        Comments comments = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         comments.update(commentsUpdateRequestDto);
-        return id;
+        return commentId;
     }
 
     @Transactional
-    public void delete(Long id, CommentsDeleteDto commentsDeleteDto) {
-        Comments comments = commentsRepository.findById(id)
+    public void delete(Long commentId, CommentsDeleteDto commentsDeleteDto) {
+        Comments comments = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        // 비밀번호 검증
-        if (!comments.correctPassword(commentsDeleteDto.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-        commentsRepository.delete(comments);
+        comments.delete(commentsDeleteDto);
     }
 }

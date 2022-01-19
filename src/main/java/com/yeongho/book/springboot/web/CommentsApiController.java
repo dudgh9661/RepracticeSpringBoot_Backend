@@ -30,15 +30,15 @@ public class CommentsApiController {
     }
 
     // 수정
-    @PutMapping("/api/v1/comments/{id}")
-    public Long update(@PathVariable Long id, @RequestBody CommentsUpdateRequestDto requestDto) {
-        return commentsService.update(id, requestDto);
+    @PutMapping("/api/v1/comments/{commentId}")
+    public Long update(@PathVariable Long commentId, @RequestBody CommentsUpdateRequestDto requestDto) {
+        return commentsService.update(commentId, requestDto);
     }
 
     // 삭제
-    @DeleteMapping("/api/v1/comments/{id}")
-    public Long delete(@PathVariable Long id, @RequestBody CommentsDeleteDto commentsDeleteDto) {
-        commentsService.delete(id, commentsDeleteDto);
-        return id;
+    @PostMapping("/api/v1/comments/{commentId}")
+    public Long delete(@PathVariable Long commentId, @RequestBody CommentsDeleteDto commentsDeleteDto) {
+        commentsService.delete(commentId, commentsDeleteDto);
+        return commentId;
     }
 }
