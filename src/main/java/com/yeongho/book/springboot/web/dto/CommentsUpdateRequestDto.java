@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommentsUpdateRequestDto {
     private String password;
-    private String comment;
+    private String text;
 
     @Builder
-    public CommentsUpdateRequestDto(String password, String comment) {
+    public CommentsUpdateRequestDto(String password, String text) {
         this.password = password;
-        this.comment = comment;
+        this.text = text;
     }
 }

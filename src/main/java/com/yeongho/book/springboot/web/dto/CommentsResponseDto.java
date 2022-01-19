@@ -1,7 +1,6 @@
 package com.yeongho.book.springboot.web.dto;
 
 import com.yeongho.book.springboot.domain.posts.Comments;
-import com.yeongho.book.springboot.domain.posts.Posts;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -15,14 +14,16 @@ public class CommentsResponseDto {
     private Long id;
     private Long parentId;
     private String author;
-    private String comment;
+    private String text;
+    private Boolean isDeleted;
     private LocalDateTime modifiedDate;
 
     public CommentsResponseDto(Comments comments) {
         this.id = comments.getId();
         this.parentId = comments.getParentId();
         this.author = comments.getAuthor();
-        this.comment = comments.getComment();
+        this.text = comments.getText();
+        this.isDeleted = comments.getIsDelete();
         this.modifiedDate = comments.getModifiedDate();
     }
 }

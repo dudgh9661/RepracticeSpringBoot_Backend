@@ -6,18 +6,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Setter
 @Getter
 @NoArgsConstructor
 public class CommentsSaveRequestDto {
-    private Long parentId;
-    private Long postId;
+    private String parentId;
+    private String postId;
     private String author;
     private String password;
-    private String comment;
+    private String text;
 
     public void setPasswordEncoding(String password) {
         // 비밀번호를 암호화해서 저장한다.
@@ -25,21 +23,21 @@ public class CommentsSaveRequestDto {
     }
 
     @Builder
-    public CommentsSaveRequestDto(Long parentId, Long postId, String author, String password, String comment) {
+    public CommentsSaveRequestDto(String parentId, String postId, String author, String password, String text) {
         this.parentId = parentId;
         this.postId = postId;
         this.author = author;
         this.password = password;
-        this.comment = comment;
+        this.text = text;
     }
 
     public Comments toEntity(Posts post) {
         return Comments.builder()
-                .parentId(parentId)
+                .parentId(Long.parseLong(parentId))
                 .post(post)
                 .author(author)
                 .password(password)
-                .comment(comment)
+                .text(text)
                 .build();
     }
 }
