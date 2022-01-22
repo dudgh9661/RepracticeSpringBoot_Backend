@@ -4,8 +4,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import javax.persistence.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @ToString
 @Getter
@@ -26,9 +35,6 @@ public class FileItem {
     @Column(nullable = false)
     private String filePath;
 
-    @Column
-    private String isDeleted;
-
     @ManyToOne
     private Posts posts;
 
@@ -41,5 +47,14 @@ public class FileItem {
 
     public void setPosts(Posts posts) {
         this.posts = posts;
+    }
+
+    public ResponseEntity<Resource> download() throws IOException {
+        Path path = Paths.get(this.getFilePath());
+        String contentType = Files.probeContentType(path);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+        Resource resource = new InputStreamResource(Files.newInputStream(path));
+        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 }

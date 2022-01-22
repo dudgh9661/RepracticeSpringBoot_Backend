@@ -1,8 +1,12 @@
 package com.yeongho.book.springboot.web;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.web.dto.FileResponseDto;
+import com.yeongho.book.springboot.web.dto.PostsListResponseDto;
+import com.yeongho.book.springboot.web.dto.PostsResponseDto;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +19,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -35,9 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 public class PostApiControllerTest {
-
-    @LocalServerPort
-    private int port;
 
     @Autowired
     private PostsRepository postsRepository;
@@ -77,6 +79,7 @@ public class PostApiControllerTest {
         MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
                 content.getBytes(StandardCharsets.UTF_8));
 
+
         mockMvc.perform(multipart("/api/v1/posts").file(image).file(image2).file(json).contentType("multipart/mixed")
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk());
 
@@ -110,7 +113,7 @@ public class PostApiControllerTest {
         MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
                 content.getBytes(StandardCharsets.UTF_8));
 
-        Long postId = Long.parseLong(mockMvc.perform(multipart("/api/v1/posts").file(json).contentType("multipart/mixed")
+        Long postId = Long.parseLong(mockMvc.perform(multipart("/api/v1/posts").file(json).file(image).contentType("multipart/mixed")
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
         //when
@@ -143,7 +146,7 @@ public class PostApiControllerTest {
             }
         });
 
-        Long updatedPostId = Long.parseLong(mockMvc.perform(builder.file(updatedJson).contentType("multipart/mixed")
+        Long updatedPostId = Long.parseLong(mockMvc.perform(builder.file(updatedJson).file(updatedImage).file(updatedImage2).contentType("multipart/mixed")
         .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
         Posts post = postsRepository.findById(updatedPostId).orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다." + updatedPostId));
@@ -151,7 +154,7 @@ public class PostApiControllerTest {
         //then
         assertThat(updatedData.get("title")).isEqualTo(post.getTitle());
         assertThat(updatedData.get("content")).isEqualTo(post.getContent());
-        assertThat(post.getFileItem()).isEmpty();
+        assertThat(post.getFileItem().stream().count()).isEqualTo(2);
 //        assertThat("updatedImage.png").isEqualTo(post.getFileItem().get(0).getOriginFileName());
 //        assertThat("updatedImage2.png").isEqualTo(post.getFileItem().get(1).getOriginFileName());
     }
