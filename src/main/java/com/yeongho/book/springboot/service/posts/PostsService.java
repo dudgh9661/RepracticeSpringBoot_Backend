@@ -4,19 +4,18 @@ import com.yeongho.book.springboot.domain.posts.FileItem;
 import com.yeongho.book.springboot.domain.posts.FileRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -26,27 +25,18 @@ public class PostsService {
     private final PostsRepository postsRepository;
     private final FileRepository fileRepository;
 
-    private final PasswordEncoder passwordEncoder;
-    private final FileService fileService;
-
     @Transactional
     public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws IOException {
-        // 비밀번호를 암호화해서 저장한다.
-        postsSaveRequestDto.makePasswordEncoding(passwordEncoder.encode(postsSaveRequestDto.getPassword()));
         Posts posts = postsSaveRequestDto.toEntity();
+        posts.saveFile(files);
 
-        // 파일명이 존재하는 경우, 파일 엔티티를 생성한다.
-        // 해당 파일과 연결된 게시물과 함께 데이터베이스에 저장한다.
-        // 게시물을 저장하여 리턴한다.
-        fileService.store(files,posts);
         return postsRepository.save(posts).getId();
     }
 
     @Transactional
-    public Long update(Long id, PostsUpdateRequestDto requestDto, List<MultipartFile> files) throws IOException {
+    public Long update(Long id, PostsUpdateRequestDto requestDto, List<MultipartFile> files) throws IOException, InvalidPasswordException {
         Posts posts = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id =" + id));
-        fileService.update(files, posts);
-        posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent());
+        posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent(), files);
         return id;
     }
 
@@ -63,17 +53,17 @@ public class PostsService {
     }
 
     @Transactional
-    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws IOException {
+    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws IOException, InvalidPasswordException {
         Posts posts = postsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
-        posts.correctPassword(postsDeleteDto.getPassword());
-        fileService.delete(posts);
+        posts.verifyPassword(postsDeleteDto.getPassword());
+        posts.deleteFile();
         postsRepository.delete(posts);
     }
 
     public ResponseEntity<Resource> fileDownload(Long id) throws IOException {
-        FileItem fileItems = fileRepository.findById(id)
+        FileItem fileItem = fileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 파일이 없습니다. id = " + id));
-        return fileService.download(fileItems);
+        return fileItem.download();
     }
 }
