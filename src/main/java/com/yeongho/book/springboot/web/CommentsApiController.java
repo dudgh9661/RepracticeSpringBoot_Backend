@@ -1,5 +1,6 @@
 package com.yeongho.book.springboot.web;
 
+import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.service.posts.CommentsService;
 import com.yeongho.book.springboot.web.dto.CommentsDeleteDto;
 import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
@@ -8,6 +9,7 @@ import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin("*")
@@ -37,7 +39,7 @@ public class CommentsApiController {
 
     // 삭제
     @PostMapping("/api/v1/comments/{commentId}")
-    public Long delete(@PathVariable Long commentId, @RequestBody CommentsDeleteDto commentsDeleteDto) {
+    public Long delete(@PathVariable Long commentId, @RequestBody CommentsDeleteDto commentsDeleteDto) throws InvalidPasswordException {
         commentsService.delete(commentId, commentsDeleteDto);
         return commentId;
     }
