@@ -26,10 +26,9 @@ public class PostsService {
     private final FileRepository fileRepository;
 
     @Transactional
-    public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws IOException {
+    public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws IOException, InvalidPasswordException {
         Posts posts = postsSaveRequestDto.toEntity();
         posts.saveFile(files);
-
         return postsRepository.save(posts).getId();
     }
 

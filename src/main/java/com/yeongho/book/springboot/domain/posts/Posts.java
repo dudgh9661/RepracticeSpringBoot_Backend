@@ -57,7 +57,7 @@ public class Posts extends BaseTimeEntity {
         this.content = content;
     }
 
-    public void update(String author, String password, String title, String content, List<MultipartFile> multipartFiles) throws IOException {
+    public void update(String author, String password, String title, String content, List<MultipartFile> multipartFiles) throws IOException, InvalidPasswordException {
         //작성자와 비밀번호가 일치하면 게시물을 update 한다.
         if (getAuthor().equals(author) && verifyPassword(password)) {
             this.title = title;
@@ -67,7 +67,7 @@ public class Posts extends BaseTimeEntity {
         }
     }
 
-    public boolean verifyPassword(String password) {
+    public boolean verifyPassword(String password) throws InvalidPasswordException {
         PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
 
         if (passwordEncoder.matches(password, this.password)) {
@@ -85,7 +85,9 @@ public class Posts extends BaseTimeEntity {
     public void saveFile(List<MultipartFile> multipartFiles) throws IOException {
         if (multipartFiles.isEmpty()) {
             deleteFile();
+            return;
         }
+
 
         final String absolutePath = "/Users/kim_yeongho/Desktop/fileTestFolder";
         for (MultipartFile multipartFile : multipartFiles) {
@@ -112,6 +114,5 @@ public class Posts extends BaseTimeEntity {
         }
         // 연결된 fileItem을 삭제 -> fileItem이 고아객체가 됨.
         this.getFileItem().clear();
-
     }
 }

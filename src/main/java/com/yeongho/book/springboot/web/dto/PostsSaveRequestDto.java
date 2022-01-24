@@ -2,16 +2,14 @@ package com.yeongho.book.springboot.web.dto;
 
 import com.yeongho.book.springboot.config.WebSecurityConfig;
 import com.yeongho.book.springboot.domain.posts.Posts;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ToString
 @Getter
+@Setter
 @NoArgsConstructor
 public class PostsSaveRequestDto {
 
