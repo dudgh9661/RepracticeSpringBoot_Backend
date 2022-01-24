@@ -2,12 +2,12 @@ package com.yeongho.book.springboot.domain.posts;
 
 import com.yeongho.book.springboot.config.WebSecurityConfig;
 import com.yeongho.book.springboot.domain.BaseTimeEntity;
+import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.web.dto.CommentsDeleteDto;
 import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,31 +51,28 @@ public class Comments extends BaseTimeEntity {
         this.text = text;
     }
 
-    public void update(CommentsUpdateRequestDto requestDto) {
-        if (correctPassword(requestDto.getPassword())) {
+    public void update(CommentsUpdateRequestDto requestDto) throws InvalidPasswordException {
+        if (verifyPassword(requestDto.getPassword())) {
             this.text = requestDto.getText();
-        } else {
-            throw new IllegalStateException();
         }
     }
 
-    public void delete(CommentsDeleteDto commentsDeleteDto) {
-        if (correctPassword(commentsDeleteDto.getPassword())) {
+    public void delete(CommentsDeleteDto commentsDeleteDto) throws InvalidPasswordException {
+        if (verifyPassword(commentsDeleteDto.getPassword())) {
             this.isDelete = true;
-        } else {
-            throw new IllegalStateException();
         }
     }
-    public boolean correctPassword(String password) {
+    public boolean verifyPassword(String password) throws InvalidPasswordException {
         PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
+
         if (passwordEncoder.matches(password, this.password)) {
-            System.out.println("댓글 수정 비밀번호 일치");
+            System.out.println("비밀번호 일치");
             return true;
         } else {
-            System.out.println("댓글 수정 비밀번호 불일치");
-            System.out.println("해당 댓글 비밀번호 : " + this.password);
+            System.out.println("비밀번호 불일치함");
+            System.out.println("해당 게시물 비밀번호 : " + this.password);
             System.out.println("Client로부터 받은 비밀번호 : " + password);
-            throw new IllegalStateException("비밀번호가 틀렸습니다");
+            throw new InvalidPasswordException();
         }
     }
 }

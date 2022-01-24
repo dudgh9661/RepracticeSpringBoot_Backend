@@ -4,6 +4,7 @@ import com.yeongho.book.springboot.domain.posts.Comments;
 import com.yeongho.book.springboot.domain.posts.CommentsRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.web.dto.CommentsDeleteDto;
 import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
 import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
@@ -35,16 +36,14 @@ public class CommentsService {
 
     @Transactional
     public Long save(CommentsSaveRequestDto commentsSaveRequestDto) {
-        // 1. 댓글을 다는 게시물의 Posts 객체를 불러온다.
         Long postId = Long.parseLong(commentsSaveRequestDto.getPostId());
         Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
-        // 2. 불러온 post 객체를 FK로 이용해 Comment data를 저장한다.
-        commentsSaveRequestDto.setPasswordEncoding(passwordEncoder.encode(commentsSaveRequestDto.getPassword())); // pw 암호화
+
         return commentsRepository.save(commentsSaveRequestDto.toEntity(post)).getId();
     }
 
     @Transactional
-    public Long update(Long commentId, CommentsUpdateRequestDto commentsUpdateRequestDto) {
+    public Long update(Long commentId, CommentsUpdateRequestDto commentsUpdateRequestDto) throws InvalidPasswordException {
         Comments comments = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         comments.update(commentsUpdateRequestDto);
@@ -52,7 +51,7 @@ public class CommentsService {
     }
 
     @Transactional
-    public void delete(Long commentId, CommentsDeleteDto commentsDeleteDto) {
+    public void delete(Long commentId, CommentsDeleteDto commentsDeleteDto) throws InvalidPasswordException {
         Comments comments = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         comments.delete(commentsDeleteDto);

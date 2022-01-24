@@ -1,11 +1,13 @@
 package com.yeongho.book.springboot.web.dto;
 
+import com.yeongho.book.springboot.config.WebSecurityConfig;
 import com.yeongho.book.springboot.domain.posts.Comments;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Setter
 @Getter
@@ -32,11 +34,12 @@ public class CommentsSaveRequestDto {
     }
 
     public Comments toEntity(Posts post) {
+        final PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
         return Comments.builder()
                 .parentId(Long.parseLong(parentId))
                 .post(post)
                 .author(author)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .text(text)
                 .build();
     }
