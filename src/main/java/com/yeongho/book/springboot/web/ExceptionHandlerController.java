@@ -21,16 +21,6 @@ public class ExceptionHandlerController {
         return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(errorCode.getStatusCode()));
     }
 
-    @ExceptionHandler(FileException.class)
-    protected ResponseEntity<ErrorResponse> fileException(FileException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .statusCode(errorCode.getStatusCode())
-                .message(errorCode.getMessage())
-                .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(errorCode.getStatusCode()));
-    }
-
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> exception(Exception e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
