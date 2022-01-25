@@ -106,11 +106,10 @@ public class Posts extends BaseTimeEntity {
     }
 
     public void deleteFile() throws IOException {
-        for(FileItem fileItem : this.getFileItem()) {
+        for (FileItem fileItem : this.getFileItem()) {
             // 물리적으로 파일 삭제
             Path pathToDeleteFile = Paths.get(fileItem.getFilePath());
             Files.delete(pathToDeleteFile);
-
         }
         // 연결된 fileItem을 삭제 -> fileItem이 고아객체가 됨.
         this.getFileItem().clear();
