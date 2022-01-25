@@ -4,6 +4,7 @@ import com.yeongho.book.springboot.domain.posts.FileItem;
 import com.yeongho.book.springboot.domain.posts.FileRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.exception.FileException;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -26,16 +27,26 @@ public class PostsService {
     private final FileRepository fileRepository;
 
     @Transactional
-    public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws IOException, InvalidPasswordException {
+    public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
         Posts posts = postsSaveRequestDto.toEntity();
-        posts.saveFile(files);
+        try {
+            posts.saveFile(files);
+        } catch (IOException e) {
+            throw new FileException();
+        }
         return postsRepository.save(posts).getId();
     }
 
     @Transactional
-    public Long update(Long id, PostsUpdateRequestDto requestDto, List<MultipartFile> files) throws IOException, InvalidPasswordException {
+    public Long update(Long id, PostsUpdateRequestDto requestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
         Posts posts = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id =" + id));
-        posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent(), files);
+
+        try {
+            posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent(), files);
+        } catch (Exception e) {
+            throw new FileException();
+        }
+
         return id;
     }
 
@@ -52,17 +63,29 @@ public class PostsService {
     }
 
     @Transactional
-    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws IOException, InvalidPasswordException {
+    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws InvalidPasswordException {
         Posts posts = postsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
         posts.verifyPassword(postsDeleteDto.getPassword());
-        posts.deleteFile();
+
+        try {
+            posts.deleteFile();
+        } catch (IOException e) {
+            throw new FileException();
+        }
+
         postsRepository.delete(posts);
     }
 
-    public ResponseEntity<Resource> fileDownload(Long id) throws IOException {
+    public ResponseEntity<Resource> fileDownload(Long id) throws FileException {
+
         FileItem fileItem = fileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 파일이 없습니다. id = " + id));
-        return fileItem.download();
+
+        try {
+            return fileItem.download();
+        } catch (IOException e) {
+            throw new FileException();
+        }
     }
 }

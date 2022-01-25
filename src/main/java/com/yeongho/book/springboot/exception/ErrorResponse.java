@@ -3,7 +3,9 @@ package com.yeongho.book.springboot.exception;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+@ToString
 @Getter
 @NoArgsConstructor
 public class ErrorResponse {
@@ -11,7 +13,7 @@ public class ErrorResponse {
     private String message;
 
     @Builder
-    ErrorResponse (int statusCode, String message) {
+    public ErrorResponse (int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }

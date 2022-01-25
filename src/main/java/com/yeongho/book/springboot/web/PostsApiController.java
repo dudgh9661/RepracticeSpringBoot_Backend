@@ -25,12 +25,12 @@ public class PostsApiController {
     }
 
     @PostMapping("/api/v1/posts")
-    public Long save(@RequestPart(value="data") PostsSaveRequestDto postsSaveRequestDto, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
+    public Long save(@RequestPart(value="data") PostsSaveRequestDto postsSaveRequestDto, @RequestPart(value = "file", required = false) List<MultipartFile> files) {
         return postsService.save(postsSaveRequestDto, files);
     }
 
     @PutMapping("/api/v1/posts/{id}")
-    public Long update(@PathVariable Long id, @RequestPart(value="data") PostsUpdateRequestDto postsUpdateRequestDto, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException, InvalidPasswordException {
+    public Long update(@PathVariable Long id, @RequestPart(value="data") PostsUpdateRequestDto postsUpdateRequestDto, @RequestPart(value = "file", required = false) List<MultipartFile> files) {
         return postsService.update(id, postsUpdateRequestDto, files);
     }
 
@@ -40,16 +40,12 @@ public class PostsApiController {
     }
 
     @PostMapping("/api/v1/posts/{id}")
-    public void delete(@PathVariable Long id, @RequestBody PostsDeleteDto postsDeleteDto) throws IOException, InvalidPasswordException {
+    public void delete(@PathVariable Long id, @RequestBody PostsDeleteDto postsDeleteDto) {
         postsService.delete(id, postsDeleteDto);
     }
 
     @GetMapping("/api/v1/posts/download/{id}")
-    public ResponseEntity<Resource> fileDownload(@PathVariable Long id) throws IOException {
-        try {
-            return postsService.fileDownload(id);
-        } catch (IOException e) {
-           return null;
-        }
+    public ResponseEntity<Resource> fileDownload(@PathVariable Long id) {
+        return postsService.fileDownload(id);
     }
 }
