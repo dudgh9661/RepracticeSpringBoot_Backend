@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.exception.ErrorResponse;
+import com.yeongho.book.springboot.exception.FileException;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.service.posts.PostsService;
 import com.yeongho.book.springboot.web.dto.PostsSaveRequestDto;
@@ -63,7 +64,7 @@ public class ExceptionHandlerControllerTest {
     }
 
     @Test
-    public void IOException_예외처리_테스트() throws Exception {
+    public void FileException_예외처리_테스트() throws Exception {
         // given
         PostsSaveRequestDto postsSaveRequestDto = PostsSaveRequestDto.builder()
                 .author("author")
@@ -73,7 +74,7 @@ public class ExceptionHandlerControllerTest {
                 .build();
 
         // when
-        when(postsApiController.save(any(), any())).thenThrow(new IOException());
+        when(postsApiController.save(any(), any())).thenThrow(new FileException());
 
         String content = objectMapper.writeValueAsString(postsSaveRequestDto);
         MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
@@ -85,7 +86,8 @@ public class ExceptionHandlerControllerTest {
         .andReturn().getResponse().getContentAsString();
 
         ErrorResponse errorResponse = objectMapper.readValue(result, ErrorResponse.class);
+        System.out.println(errorResponse.toString());
         Assertions.assertThat(errorResponse.getStatusCode()).isEqualTo(500);
-        Assertions.assertThat(errorResponse.getMessage()).isEqualTo("문제가 발생했습니다. 시스템 관리자에게 문의해주세요.");
+        Assertions.assertThat(errorResponse.getMessage()).isEqualTo("파일 처리가 정상적으로 이루어지지 않았습니다. 시스템 관리자에게 문의해주세요.");
     }
 }

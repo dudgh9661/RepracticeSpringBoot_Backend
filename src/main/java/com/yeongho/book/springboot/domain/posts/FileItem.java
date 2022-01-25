@@ -1,5 +1,6 @@
 package com.yeongho.book.springboot.domain.posts;
 
+import com.yeongho.book.springboot.exception.FileException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,7 +50,7 @@ public class FileItem {
         this.posts = posts;
     }
 
-    public ResponseEntity<Resource> download() throws IOException {
+    public ResponseEntity<Resource> download() throws FileException, IOException {
         Path path = Paths.get(this.getFilePath());
         String contentType = Files.probeContentType(path);
         HttpHeaders headers = new HttpHeaders();
