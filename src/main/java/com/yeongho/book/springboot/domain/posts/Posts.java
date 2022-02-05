@@ -45,8 +45,8 @@ public class Posts extends BaseTimeEntity {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
-
-    @OneToMany(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+//(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<FileItem> fileItem = new ArrayList<>();
 
     @Builder
@@ -88,7 +88,6 @@ public class Posts extends BaseTimeEntity {
             return;
         }
 
-
         final String absolutePath = "/Users/kim_yeongho/Desktop/fileTestFolder";
         for (MultipartFile multipartFile : multipartFiles) {
             String uuid = UUID.randomUUID().toString();
@@ -101,7 +100,8 @@ public class Posts extends BaseTimeEntity {
             // 파일을 물리적으로 저장한다.
             multipartFile.transferTo(new File(fileItem.getFilePath()));
             getFileItem().add(fileItem);
-            fileItem.setPosts(this);
+            System.out.println("hihihihihi");
+//            fileItem.setPosts(this);
         }
     }
 
