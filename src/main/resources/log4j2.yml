@@ -1,0 +1,20 @@
+Configuration:
+  name: Default
+  status: debug
+
+  Appenders:
+    Console:
+      name: LogToConsole
+      target: SYSTEM_OUT
+      PatternLayout:
+        disableAnsi: "false"
+        pattern: "%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red bright, WARN=yellow, INFO=green bright, DEBUG=black, TRACE=blue} %style{}{magenta} [%M] %style{%40C}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%xEx}"
+
+
+
+
+  Loggers:
+    Root:
+      level: DEBUG
+      AppenderRef:
+        - ref: LogToConsole

@@ -86,7 +86,6 @@ public class ExceptionHandlerControllerTest {
         .andReturn().getResponse().getContentAsString();
 
         ErrorResponse errorResponse = objectMapper.readValue(result, ErrorResponse.class);
-        System.out.println(errorResponse.toString());
         Assertions.assertThat(errorResponse.getStatusCode()).isEqualTo(500);
         Assertions.assertThat(errorResponse.getMessage()).isEqualTo("파일 처리가 정상적으로 이루어지지 않았습니다. 시스템 관리자에게 문의해주세요.");
     }

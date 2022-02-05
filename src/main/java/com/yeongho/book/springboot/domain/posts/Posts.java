@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.extern.log4j.Log4j2;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 @ToString
 @Getter
+@Log4j2
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
@@ -71,13 +73,11 @@ public class Posts extends BaseTimeEntity {
         PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
 
         if (passwordEncoder.matches(password, this.password)) {
-            System.out.println("비밀번호가 일치함");
+            log.info("사용자가 입력한 비밀번호 일치");
             return true;
         } else {
             // 비밀번호가 일치하지 않을 시, 프론트로 에러코드 발송 필요
-            System.out.println("비밀번호 불일치함");
-            System.out.println("해당 게시물 비밀번호 : " + this.password);
-            System.out.println("Client로부터 받은 비밀번호 : " + password);
+            log.info("사용자가 입력한 비밀번호 불일치");
             throw new InvalidPasswordException();
         }
     }
@@ -100,7 +100,6 @@ public class Posts extends BaseTimeEntity {
             // 파일을 물리적으로 저장한다.
             multipartFile.transferTo(new File(fileItem.getFilePath()));
             getFileItem().add(fileItem);
-            System.out.println("hihihihihi");
 //            fileItem.setPosts(this);
         }
     }

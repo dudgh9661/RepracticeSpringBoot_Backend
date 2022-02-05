@@ -8,6 +8,8 @@ import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.Level;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.persistence.*;
 
 @Getter
+@Log4j2
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
@@ -66,12 +69,10 @@ public class Comments extends BaseTimeEntity {
         PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
 
         if (passwordEncoder.matches(password, this.password)) {
-            System.out.println("비밀번호 일치");
+            log.info("사용자가 입력한 비밀번호 일치");
             return true;
         } else {
-            System.out.println("비밀번호 불일치함");
-            System.out.println("해당 게시물 비밀번호 : " + this.password);
-            System.out.println("Client로부터 받은 비밀번호 : " + password);
+            log.info("사용자가 입력한 비밀번호 불일치");
             throw new InvalidPasswordException();
         }
     }
