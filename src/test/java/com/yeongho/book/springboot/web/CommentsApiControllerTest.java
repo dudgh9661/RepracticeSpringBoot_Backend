@@ -7,6 +7,7 @@ import com.yeongho.book.springboot.domain.posts.CommentsRepository;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
 import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
+import lombok.extern.log4j.Log4j2;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Log4j2
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -51,10 +53,10 @@ public class CommentsApiControllerTest {
 
     @Before
     public void beforeClear() throws Exception {
-        System.out.println("### comment Test 초기화 deleteAll() 시작");
+        log.info("comment Test 초기화 deleteAll() 시작");
         commentsRepository.deleteAll();
         postsRepository.deleteAll();
-        System.out.println("### comment Test 초기화 deleteAll() 종료");
+        log.info("comment Test 초기화 deleteAll() 종료");
 
         // 댓글 테스트를 위해 게시글 작성이 선행되어야 한다.
         Map<String, Object> data = new HashMap<>();
