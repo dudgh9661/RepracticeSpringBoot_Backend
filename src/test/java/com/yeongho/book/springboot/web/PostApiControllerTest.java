@@ -7,6 +7,7 @@ import com.yeongho.book.springboot.domain.posts.PostsRepository;
 import com.yeongho.book.springboot.web.dto.FileResponseDto;
 import com.yeongho.book.springboot.web.dto.PostsListResponseDto;
 import com.yeongho.book.springboot.web.dto.PostsResponseDto;
+import lombok.extern.log4j.Log4j2;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Log4j2
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -98,7 +100,7 @@ public class PostApiControllerTest {
     @Transactional
     public void 게시물수정() throws Exception {
         //given
-        System.out.println("### 게시물 신규 추가");
+        log.info("게시물 신규 추가");
 
         Map<String,String> data = new HashMap<>();
         data.put("author", "author");
@@ -117,7 +119,7 @@ public class PostApiControllerTest {
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
         //when
-        System.out.println("### 게시물 수정 시작");
+        log.info("게시물 수정 시작");
 
         Map<String,String> updatedData = new HashMap<>();
         updatedData.put("author", "author");
@@ -135,7 +137,7 @@ public class PostApiControllerTest {
         MockMultipartFile updatedJson = new MockMultipartFile("data", "jsonData", "application/json",
                 updatedContent.getBytes(StandardCharsets.UTF_8));
 
-        System.out.println("파일 업데이트 시작");
+        log.info("파일 업데이트 시작");
         // call update API
         MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/api/v1/posts/" + postId);
         builder.with(new RequestPostProcessor() {
