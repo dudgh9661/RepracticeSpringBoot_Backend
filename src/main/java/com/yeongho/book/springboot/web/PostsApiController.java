@@ -1,17 +1,17 @@
 package com.yeongho.book.springboot.web;
 
-import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.service.posts.PostsService;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
+@Log4j2
 @CrossOrigin(origins = "http://localhost:8081")
 @RequiredArgsConstructor
 @RestController
@@ -22,6 +22,12 @@ public class PostsApiController {
     @GetMapping("/api/v1/posts")
     public List<PostsListResponseDto> findAll() {
         return postsService.findAll();
+    }
+
+    @GetMapping("/api/v1/posts/search")
+    public List<PostsListResponseDto> findByCondition(@RequestParam String searchType, @RequestParam String keyword) {
+        log.info("searchType : " + searchType + " & keyword : " + keyword);
+        return postsService.findByCondition(searchType, keyword);
     }
 
     @PostMapping("/api/v1/posts")
