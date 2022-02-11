@@ -12,7 +12,7 @@ import java.io.IOException;
 public class ExceptionHandlerController {
 
     @ExceptionHandler(CustomException.class)
-    protected ResponseEntity<ErrorResponse> invalidPasswordException(CustomException e) {
+    protected ResponseEntity<ErrorResponse> CustomException(CustomException e) {
         ErrorCode errorCode = e.getErrorCode();
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .statusCode(errorCode.getStatusCode())

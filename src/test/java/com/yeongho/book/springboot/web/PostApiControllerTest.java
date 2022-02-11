@@ -1,5 +1,6 @@
 package com.yeongho.book.springboot.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.domain.posts.Posts;
@@ -9,6 +10,8 @@ import com.yeongho.book.springboot.web.dto.PostsListResponseDto;
 import com.yeongho.book.springboot.web.dto.PostsResponseDto;
 import lombok.extern.log4j.Log4j2;
 import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 public class PostApiControllerTest {
+    private Long postId;
 
     @Autowired
     private PostsRepository postsRepository;
@@ -53,15 +57,8 @@ public class PostApiControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @After
-    public void clear() throws Exception {
-        postsRepository.deleteAll();
-    }
-
-    @Transactional
-    @Test
-    public void 게시물등록() throws Exception {
-        //given
+    @Before
+    public void init() throws Exception {
         Map<String,String> data = new HashMap<>();
         data.put("author", "author");
         data.put("password", "123");
@@ -72,19 +69,26 @@ public class PostApiControllerTest {
                 "<<png data>>".getBytes());
         MockMultipartFile image2 = new MockMultipartFile("file", "image2.png", "image/png",
                 "<<png data>>".getBytes());
-        List<MockMultipartFile> mockMultipartFiles = new ArrayList<>();
-        mockMultipartFiles.add(image);
-        mockMultipartFiles.add(image2);
+//        List<MockMultipartFile> mockMultipartFiles = new ArrayList<>();
+//        mockMultipartFiles.add(image);
+//        mockMultipartFiles.add(image2);
 
         String content = objectMapper.writeValueAsString(data);
 
         MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
                 content.getBytes(StandardCharsets.UTF_8));
 
+        postId = Long.parseLong(mockMvc.perform(multipart("/api/v1/posts").file(json).file(image).file(image2).contentType("multipart/mixed")
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+    }
+    @After
+    public void clear() throws Exception {
+        postsRepository.deleteAll();
+    }
 
-        mockMvc.perform(multipart("/api/v1/posts").file(image).file(image2).file(json).contentType("multipart/mixed")
-                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk());
-
+    @Transactional
+    @Test
+    public void 게시물등록() throws Exception {
         //when
         List<Posts> postsList = postsRepository.findAll();
 
@@ -99,25 +103,6 @@ public class PostApiControllerTest {
     @Test
     @Transactional
     public void 게시물수정() throws Exception {
-        //given
-        log.info("게시물 신규 추가");
-
-        Map<String,String> data = new HashMap<>();
-        data.put("author", "author");
-        data.put("password", "123");
-        data.put("title", "title");
-        data.put("content", "content");
-
-        MockMultipartFile image = new MockMultipartFile("file", "image.png", "image/png",
-                "<<png data>>".getBytes());
-        String content = objectMapper.writeValueAsString(data);
-
-        MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
-                content.getBytes(StandardCharsets.UTF_8));
-
-        Long postId = Long.parseLong(mockMvc.perform(multipart("/api/v1/posts").file(json).file(image).contentType("multipart/mixed")
-                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
-
         //when
         log.info("게시물 수정 시작");
 
@@ -163,29 +148,13 @@ public class PostApiControllerTest {
 
     @Test
     public void 게시물삭제() throws Exception {
-        //given
-        Map<String,String> data = new HashMap<>();
-        data.put("author", "author");
-        data.put("password", "123");
-        data.put("title", "title");
-        data.put("content", "content");
-
-        MockMultipartFile image = new MockMultipartFile("file", "image.png", "image/png",
-                "<<png data>>".getBytes());
-        String content = objectMapper.writeValueAsString(data);
-
-        MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
-                content.getBytes(StandardCharsets.UTF_8));
-
-        Long postId = Long.parseLong(mockMvc.perform(multipart("/api/v1/posts").file(image).file(json).contentType("multipart/mixed")
-                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
-
-        Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId));
         //when
+        Map<String,String> data = new HashMap<>();
+        Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId));
 
         data.clear();
         data.put("password", "123");
-        content = objectMapper.writeValueAsString(data);
+        String content = objectMapper.writeValueAsString(data);
 
         this.mockMvc.perform(post("/api/v1/posts/" + post.getId())
                 .content(content)
@@ -193,10 +162,59 @@ public class PostApiControllerTest {
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
                 .andExpect(status().isOk());
 
-
         //then
         assertThatIllegalArgumentException().isThrownBy(() -> postsRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId)));
     }
 
+    @Test
+    public void 제목_검색기능() throws Exception {
+        //given
+        Map<String,String> data = new HashMap<>();
+        data.put("author", "author");
+        data.put("password", "123");
+        data.put("title", "title123");
+        data.put("content", "content");
+
+        String content = objectMapper.writeValueAsString(data);
+        MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
+                content.getBytes(StandardCharsets.UTF_8));
+
+        content = objectMapper.writeValueAsString(data);
+        json = new MockMultipartFile("data", "jsonData", "application/json",
+                content.getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/v1/posts").file(json).contentType("multipart/mixed")
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk());
+
+        //when
+        String result = mockMvc.perform(get("/api/v1/posts/search?" + "searchType=title&keyword=title")).andReturn().getResponse().getContentAsString();
+        log.info("제목 검색 결과 : " + result);
+        List<PostsListResponseDto> resultList = objectMapper.readValue(result, new TypeReference<List<PostsListResponseDto>>(){});
+
+        //then
+        assertThat(resultList.size()).isGreaterThan(0);
+    }
+
+    @Test
+    public void 내용_검색기능() throws Exception {
+        //when
+        String result = mockMvc.perform(get("/api/v1/posts/search?" + "searchType=content&keyword=content")).andReturn().getResponse().getContentAsString();
+        log.info("내용_검색기능 결과 : " + result);
+        List<PostsListResponseDto> resultList = objectMapper.readValue(result, new TypeReference<List<PostsListResponseDto>>(){});
+
+        //then
+        assertThat(resultList.size()).isGreaterThan(0);
+    }
+
+    @Test
+    public void 작성자_검색기능() throws Exception {
+        //when
+        String result = mockMvc.perform(get("/api/v1/posts/search?" + "searchType=author&keyword=author")).andReturn().getResponse().getContentAsString();
+        log.info("작성자_검색기능 결과 : " + result);
+        List<PostsListResponseDto> resultList = objectMapper.readValue(result, new TypeReference<List<PostsListResponseDto>>(){});
+
+        //then
+        assertThat(resultList.size()).isGreaterThan(0);
+    }
 }
