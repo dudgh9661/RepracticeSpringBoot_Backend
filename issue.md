@@ -26,4 +26,11 @@
  [참고자료](https://www.lesstif.com/security/argon2-password-hashing-95879198.html)
  
  [핵심내용](https://d2.naver.com/helloworld/318732)
- 
+
+-------
+### @RequestParam vs @PathVariable
+
+1. **@RequestParam**은 query parameters를 추출하기 위해 사용되는 반면, **@PathVariable**은 URI로부터 data를 추출하기 위해 사용된다.
+
+2. **@RequestParam**은 query parameter들이 쓰인 traditional Web application에 더 적합하다. 반면에, **@PathVariable**은 ***RESTful API Server***에 더 적합하다 (e.g. http://localhost:8080/book/9783827319333)
+

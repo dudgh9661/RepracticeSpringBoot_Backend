@@ -6,6 +6,7 @@ import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
 import com.yeongho.book.springboot.exception.FileException;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
+import com.yeongho.book.springboot.exception.PostsException;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -88,5 +91,24 @@ public class PostsService {
         } catch (IOException e) {
             throw new FileException();
         }
+    }
+
+    public List<PostsListResponseDto> findByCondition(String searchType, String keyword) {
+        List<Posts> posts = new ArrayList<>();
+        switch(searchType) {
+            case "title" :
+                posts = postsRepository.findByTitleContaining(keyword);
+                break;
+            case "content" :
+                posts = postsRepository.findByContentContaining(keyword);
+                break;
+            case "author" :
+                posts = postsRepository.findByAuthorContaining(keyword);
+                break;
+        }
+
+        List<PostsListResponseDto> result = posts.stream().map(PostsListResponseDto::new).collect(Collectors.toList());
+        log.info(searchType + "_검색결과 => " + result.toString());
+        return result;
     }
 }
