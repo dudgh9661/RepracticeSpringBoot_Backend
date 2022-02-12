@@ -50,6 +50,11 @@ dependencies {
 
     compile('com.fasterxml.jackson.core:jackson-databind')
     compile('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml')
+
+    compileOnly("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 }
 
 configurations {
