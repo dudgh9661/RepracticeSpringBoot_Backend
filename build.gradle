@@ -51,10 +51,14 @@ dependencies {
     compile('com.fasterxml.jackson.core:jackson-databind')
     compile('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml')
 
+    compile('org.springframework.session:spring-session-jdbc')
+
     compileOnly("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+
+    compile("org.mariadb.jdbc:mariadb-java-client")
 }
 
 configurations {
