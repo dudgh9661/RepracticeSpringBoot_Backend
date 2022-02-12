@@ -83,21 +83,29 @@ public class Posts extends BaseTimeEntity {
     }
 
     public void saveFile(List<MultipartFile> multipartFiles) throws IOException {
+        log.info("파일 저장 시작");
         if (multipartFiles.isEmpty()) {
             deleteFile();
             return;
         }
 
-        final String absolutePath = "/Users/kim_yeongho/Desktop/fileTestFolder";
+        File fileConfig = new File("files");
+        log.info("파일 저장 경로 : " + fileConfig.getAbsolutePath());
+        if (!fileConfig.getAbsoluteFile().exists()) {
+            fileConfig.getAbsoluteFile().mkdirs();
+            log.info(fileConfig.getAbsolutePath() + " 경로에 폴더가 존재하지 않습니다. 폴더를 생성합니다.");
+            log.info(fileConfig.getPath() + " 경로에 폴더가 존재하지 않습니다. 폴더를 생성합니다.");
+        }
         for (MultipartFile multipartFile : multipartFiles) {
             String uuid = UUID.randomUUID().toString();
 
             FileItem fileItem = FileItem.builder()
                     .originFileName(multipartFile.getOriginalFilename())
                     .uniqueFileName(uuid)
-                    .filePath(absolutePath + "/" + uuid + "_" + multipartFile.getOriginalFilename())
+                    .filePath(fileConfig.getPath() + "/" + uuid + "_" + multipartFile.getOriginalFilename())
                     .build();
             // 파일을 물리적으로 저장한다.
+            log.info("저장된 파일 정보 => " + fileItem.toString());
             multipartFile.transferTo(new File(fileItem.getFilePath()));
             getFileItem().add(fileItem);
 //            fileItem.setPosts(this);
