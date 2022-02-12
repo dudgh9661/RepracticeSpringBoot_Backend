@@ -36,8 +36,8 @@ public class FileItem {
     @Column(nullable = false)
     private String filePath;
 
-//    @ManyToOne
-//    private Posts posts;
+    @ManyToOne
+    private Posts posts;
 
     @Builder
     public FileItem(String uniqueFileName, String originFileName, String filePath) {
@@ -46,9 +46,9 @@ public class FileItem {
         this.filePath = filePath;
     }
 
-//    public void setPosts(Posts posts) {
-//        this.posts = posts;
-//    }
+    public void setPosts(Posts posts) {
+        this.posts = posts;
+    }
 
     public ResponseEntity<Resource> download() throws FileException, IOException {
         Path path = Paths.get(this.getFilePath());

@@ -48,7 +48,7 @@ public class Posts extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 //(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "posts", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<FileItem> fileItem = new ArrayList<>();
 
     @Builder
@@ -108,7 +108,7 @@ public class Posts extends BaseTimeEntity {
             log.info("저장된 파일 정보 => " + fileItem.toString());
             multipartFile.transferTo(new File(fileItem.getFilePath()));
             getFileItem().add(fileItem);
-//            fileItem.setPosts(this);
+            fileItem.setPosts(this);
         }
     }
 
