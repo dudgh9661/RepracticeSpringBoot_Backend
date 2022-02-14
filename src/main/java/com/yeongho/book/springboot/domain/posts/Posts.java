@@ -2,6 +2,7 @@ package com.yeongho.book.springboot.domain.posts;
 
 import com.yeongho.book.springboot.config.WebSecurityConfig;
 import com.yeongho.book.springboot.domain.BaseTimeEntity;
+import com.yeongho.book.springboot.exception.FileException;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import lombok.Builder;
 import lombok.Getter;
@@ -59,7 +60,7 @@ public class Posts extends BaseTimeEntity {
         this.content = content;
     }
 
-    public void update(String author, String password, String title, String content, List<MultipartFile> multipartFiles) throws IOException, InvalidPasswordException {
+    public void update(String author, String password, String title, String content, List<MultipartFile> multipartFiles) throws FileException, InvalidPasswordException {
         //작성자와 비밀번호가 일치하면 게시물을 update 한다.
         if (getAuthor().equals(author) && verifyPassword(password)) {
             this.title = title;
@@ -82,7 +83,7 @@ public class Posts extends BaseTimeEntity {
         }
     }
 
-    public void saveFile(List<MultipartFile> multipartFiles) throws IOException {
+    public void saveFile(List<MultipartFile> multipartFiles) throws FileException {
         log.info("파일 저장 시작");
         if (multipartFiles.isEmpty()) {
             deleteFile();
@@ -105,18 +106,26 @@ public class Posts extends BaseTimeEntity {
                     .filePath(fileConfig.getPath() + "/" + uuid + "_" + multipartFile.getOriginalFilename())
                     .build();
             // 파일을 물리적으로 저장한다.
+            try {
+                multipartFile.transferTo(new File(fileItem.getFilePath()));
+            } catch (Exception e) {
+                throw new FileException();
+            }
             log.info("저장된 파일 정보 => " + fileItem.toString());
-            multipartFile.transferTo(new File(fileItem.getFilePath()));
             getFileItem().add(fileItem);
             fileItem.setPosts(this);
         }
     }
 
-    public void deleteFile() throws IOException {
+    public void deleteFile() throws FileException {
         for (FileItem fileItem : this.getFileItem()) {
             // 물리적으로 파일 삭제
             Path pathToDeleteFile = Paths.get(fileItem.getFilePath());
-            Files.delete(pathToDeleteFile);
+            try {
+                Files.delete(pathToDeleteFile);
+            } catch (Exception e) {
+                throw new FileException();
+            }
         }
         // 연결된 fileItem을 삭제 -> fileItem이 고아객체가 됨.
         this.getFileItem().clear();

@@ -34,22 +34,14 @@ public class PostsService {
     @Transactional
     public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
         Posts posts = postsSaveRequestDto.toEntity();
-        try {
-            posts.saveFile(files);
-        } catch (IOException e) {
-            throw new FileException();
-        }
+        posts.saveFile(files);
         return postsRepository.save(posts).getId();
     }
 
     @Transactional
     public Long update(Long id, PostsUpdateRequestDto requestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
         Posts posts = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id =" + id));
-        try {
-            posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent(), files);
-        } catch (Exception e) {
-            throw new FileException();
-        }
+        posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent(), files);
 
         return id;
     }
@@ -67,16 +59,11 @@ public class PostsService {
     }
 
     @Transactional
-    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws InvalidPasswordException {
+    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws FileException, InvalidPasswordException {
         Posts posts = postsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
         posts.verifyPassword(postsDeleteDto.getPassword());
-
-        try {
-            posts.deleteFile();
-        } catch (IOException e) {
-            throw new FileException();
-        }
+        posts.deleteFile();
 
         postsRepository.delete(posts);
     }
