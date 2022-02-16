@@ -34,3 +34,19 @@
 
 2. **@RequestParam**은 query parameter들이 쓰인 traditional Web application에 더 적합하다. 반면에, **@PathVariable**은 ***RESTful API Server***에 더 적합하다 (e.g. http://localhost:8080/book/9783827319333)
 
+-------
+
+###MariaDB를 선택한 이유
+1. 가격
+    - 상용 데이터베이스인 오라클, MSSQL이 MariaDB, MySQL, PostgreSQL보다 동일 사양 대비 AWS 가격이 더 높다.
+    
+2. Amazon Aurora 교체 용이성
+    - Amazon Aurora는 AWS에서 MySQL과 PostgreSQL을 클라우드 기반에 맞게 재구성한 데이터베이스이다.
+    - 공식 자료에 의하면 RDS MySQL 대비 5배, RDS PostgreSQL보다 3배의 성능을 제공한다.그러나, 최소 비용이 월 최소 10만원 이상이기 때문에 MariaDB를 선택. 
+   
+3. MySQL vs MariaDB
+    - MySQL의 창시자인 몬티 와이드니어가 만든 프로젝트가 MariaDB
+    - 동일 하드웨어 사양으로 MySQL보다 향상된 기능
+    - [MySQL에서 MariaDB로 마이그레이션 해야 할 10가지 이유](https://xdhyix.wordpress.com/2016/03/24/mysql-에서-mariadb-로-마이그레이션-해야할-10가지-이유/)
+
+
