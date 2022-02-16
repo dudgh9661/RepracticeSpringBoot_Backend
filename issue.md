@@ -49,4 +49,26 @@
     - 동일 하드웨어 사양으로 MySQL보다 향상된 기능
     - [MySQL에서 MariaDB로 마이그레이션 해야 할 10가지 이유](https://xdhyix.wordpress.com/2016/03/24/mysql-에서-mariadb-로-마이그레이션-해야할-10가지-이유/)
 
+--------
+### HTTP Cache
 
+Web Browser( + Browser Cache) <-> Web Server
+
+> Browser Cache는 **max-age, Etag, data**를 가지고 있다.
+
+> **Etag** : Server에서 Content를 이용해 만든 Hash Value
+```
+1. Web Browser가 Web Server에게 Request 요청을 한다.
+
+2. if (max-age가 만료되지 않았다면) -> Browser Cache에 저장된 데이터를 Response 받는다.
+
+   else if (max-age가 만료됐다면) -> Server에게 Etag와 함께 data를 Request한다.
+                   if (Server는 Browser가 보낸 Etag와 자신이 가지고 있는 요청 리소스 Etag가 같다고 판단하면) 
+                            -> 304 NotModified + Etag + max-age Response한다.
+                   else if (Etag가 다르다고 판단한다면) -> 새로운 data + Etag + max-age를 response한다.
+```
+
+:question: 만약 max-age가 만료되지 않았을 때, Web Server에 새로운 소스가 배포된 상황이라면?
+> max-age가 만료되지 않았기 때문에 Web Browser는 ***Browser Cache에 저장된 이전 데이터***를 받아올 것이다. 
+> 
+> 이런 문제점을 해결하기 위해, 새로운 소스 배포 시 리소스명에 version명을 붙여 배포한다. 이렇게 하면 Web Browser는 새로운 리소스 요청으로 인식하여 새롭게 배포된 소스를 받아오게 된다.
