@@ -92,6 +92,7 @@ public class Posts extends BaseTimeEntity {
 
         File fileConfig = new File("files");
         log.info("파일 저장 경로 : " + fileConfig.getAbsolutePath());
+        log.info("폴더 존재 여부 : " + fileConfig.getAbsoluteFile().exists());
         if (!fileConfig.getAbsoluteFile().exists()) {
             fileConfig.getAbsoluteFile().mkdirs();
             log.info(fileConfig.getAbsolutePath() + " 경로에 폴더가 존재하지 않습니다. 폴더를 생성합니다.");
@@ -103,12 +104,13 @@ public class Posts extends BaseTimeEntity {
             FileItem fileItem = FileItem.builder()
                     .originFileName(multipartFile.getOriginalFilename())
                     .uniqueFileName(uuid)
-                    .filePath(fileConfig.getPath() + "/" + uuid + "_" + multipartFile.getOriginalFilename())
+                    .filePath(fileConfig.getAbsolutePath() + "/" + uuid + "_" + multipartFile.getOriginalFilename())
                     .build();
             // 파일을 물리적으로 저장한다.
             try {
                 multipartFile.transferTo(new File(fileItem.getFilePath()));
             } catch (Exception e) {
+                log.info("파일이 정상적으로 저장되지 않았습니다." + e.toString());
                 throw new FileException();
             }
             log.info("저장된 파일 정보 => " + fileItem.toString());
