@@ -23,13 +23,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@ToString
 @Getter
 @Log4j2
 @NoArgsConstructor
-@DynamicInsert
-@DynamicUpdate
 @Entity
 public class Posts extends BaseTimeEntity {
 
@@ -62,11 +60,44 @@ public class Posts extends BaseTimeEntity {
 
     public void update(String author, String password, String title, String content, List<MultipartFile> multipartFiles) throws FileException, InvalidPasswordException {
         //작성자와 비밀번호가 일치하면 게시물을 update 한다.
+        log.info("게시글 업데이트 시작");
         if (getAuthor().equals(author) && verifyPassword(password)) {
             this.title = title;
             this.content = content;
-            deleteFile();
-            saveFile(multipartFiles);
+
+            if (multipartFiles == null || multipartFiles.isEmpty()) { // 빈 업로드를 보낸 경우
+                if (this.getFileItem().isEmpty()) return; // 기존 저장된 파일이 없는 경우 return
+                deleteFile(this.getFileItem());
+            } else if (this.getFileItem().isEmpty()) { // server에 저장된 file이 없는 경우
+                saveFile(multipartFiles);
+            } else { // 업로드가 필요한 파일만 필터링하여 업로드한다.
+                List<MultipartFile> addMultipartFiles = new ArrayList<>();
+                List<FileItem> deleteFileItem = new ArrayList<>();
+
+                for (MultipartFile m : multipartFiles) {
+                    String upload = m.getOriginalFilename();
+                    for (FileItem fileItem : this.getFileItem()) {
+                        if (!upload.equals(fileItem.getOriginFileName())) {
+                            addMultipartFiles.add(m);
+                            break;
+                        }
+                    }
+                }
+
+                for (FileItem fileItem : this.getFileItem()) {
+                    String deleteFile = fileItem.getOriginFileName();
+                    boolean findDeleteFile = true;
+                    for (MultipartFile m : multipartFiles) {
+                        if (deleteFile.equals(m.getOriginalFilename())) {
+                            findDeleteFile = false;
+                            break;
+                        }
+                    }
+                    if (findDeleteFile) deleteFileItem.add(fileItem);
+                }
+                deleteFile(deleteFileItem);
+                saveFile(addMultipartFiles);
+            }
         }
     }
 
@@ -85,11 +116,6 @@ public class Posts extends BaseTimeEntity {
 
     public void saveFile(List<MultipartFile> multipartFiles) throws FileException {
         log.info("파일 저장 시작");
-        if (multipartFiles.isEmpty()) {
-            deleteFile();
-            return;
-        }
-
         File fileConfig = new File("files");
         log.info("파일 저장 경로 : " + fileConfig.getAbsolutePath());
         log.info("폴더 존재 여부 : " + fileConfig.getAbsoluteFile().exists());
@@ -113,23 +139,36 @@ public class Posts extends BaseTimeEntity {
                 log.info("파일이 정상적으로 저장되지 않았습니다." + e.toString());
                 throw new FileException();
             }
-            log.info("저장된 파일 정보 => " + fileItem.toString());
-            getFileItem().add(fileItem);
+            log.info("파일 저장 진행중 ::: " + fileItem.getOriginFileName());
+            this.getFileItem().add(fileItem);
+//            log.info()
             fileItem.setPosts(this);
         }
     }
 
-    public void deleteFile() throws FileException {
-        for (FileItem fileItem : this.getFileItem()) {
+    public void deleteFile(List<FileItem> fileItemList) throws FileException {
+        log.info("파일 삭제 시작");
+        List<FileItem> deleteFileItem = new ArrayList<>(fileItemList);
+        int size = deleteFileItem.size();
+        for (int i = 0; i < size; i++) {
+            FileItem fileItem = deleteFileItem.get(i);
             // 물리적으로 파일 삭제
+            log.info("파일 삭제 진행중 ::: " + fileItem.getFilePath() );
             Path pathToDeleteFile = Paths.get(fileItem.getFilePath());
             try {
                 Files.delete(pathToDeleteFile);
+                log.info("삭제된 파일 ::: " + fileItem.getFilePath());
             } catch (Exception e) {
+                log.error("파일 삭제 과정에서 에러 발생 ::: " + e);
                 throw new FileException();
             }
+            // fileItem List에서도 삭제
+
+            int deleteFileIdx = this.getFileItem().indexOf(fileItem);
+            if (deleteFileIdx != -1) {
+                // 연결된 fileItem을 삭제 -> fileItem이 고아객체가 됨.
+                this.getFileItem().remove(deleteFileIdx);
+            }
         }
-        // 연결된 fileItem을 삭제 -> fileItem이 고아객체가 됨.
-        this.getFileItem().clear();
     }
 }
