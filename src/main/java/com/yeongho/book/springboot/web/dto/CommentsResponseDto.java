@@ -23,7 +23,7 @@ public class CommentsResponseDto {
         this.parentId = comments.getParentId();
         this.author = comments.getAuthor();
         this.text = comments.getText();
-        this.isDeleted = comments.getIsDelete();
+        this.isDeleted = comments.getIsDeleted();
         this.modifiedDate = comments.getModifiedDate();
     }
 }

@@ -19,8 +19,6 @@ import javax.persistence.*;
 @Getter
 @Log4j2
 @NoArgsConstructor
-@DynamicInsert
-@DynamicUpdate
 @Entity
 public class Comments extends BaseTimeEntity {
     @Id
@@ -43,15 +41,16 @@ public class Comments extends BaseTimeEntity {
     private String text;
 
     @Column(columnDefinition = "boolean default false", nullable = false)
-    private Boolean isDelete;
+    private Boolean isDeleted;
 
     @Builder
-    public Comments(Long parentId, Posts post, String author, String password, String text) {
+    public Comments(Long parentId, Posts post, String author, String password, String text, Boolean isDeleted) {
         this.parentId = parentId;
         this.post = post;
         this.author = author;
         this.password = password;
         this.text = text;
+        this.isDeleted = isDeleted;
     }
 
     public void update(CommentsUpdateRequestDto requestDto) throws InvalidPasswordException {
@@ -62,7 +61,7 @@ public class Comments extends BaseTimeEntity {
 
     public void delete(CommentsDeleteDto commentsDeleteDto) throws InvalidPasswordException {
         if (verifyPassword(commentsDeleteDto.getPassword())) {
-            this.isDelete = true;
+            this.isDeleted = true;
         }
     }
     public boolean verifyPassword(String password) throws InvalidPasswordException {
