@@ -18,6 +18,7 @@ public class CommentsSaveRequestDto {
     private String author;
     private String password;
     private String text;
+    private Boolean isDeleted;
 
     public void setPasswordEncoding(String password) {
         // 비밀번호를 암호화해서 저장한다.
@@ -25,12 +26,13 @@ public class CommentsSaveRequestDto {
     }
 
     @Builder
-    public CommentsSaveRequestDto(String parentId, String postId, String author, String password, String text) {
+    public CommentsSaveRequestDto(String parentId, String postId, String author, String password, String text, Boolean isDeleted) {
         this.parentId = parentId;
         this.postId = postId;
         this.author = author;
         this.password = password;
         this.text = text;
+        this.isDeleted = isDeleted;
     }
 
     public Comments toEntity(Posts post) {
@@ -41,6 +43,7 @@ public class CommentsSaveRequestDto {
                 .author(author)
                 .password(passwordEncoder.encode(password))
                 .text(text)
+                .isDeleted(isDeleted)
                 .build();
     }
 }

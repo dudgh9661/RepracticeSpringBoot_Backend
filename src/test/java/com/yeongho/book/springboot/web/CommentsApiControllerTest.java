@@ -96,6 +96,7 @@ public class CommentsApiControllerTest {
         data.put("author", "kyh2");
         data.put("password", "123");
         data.put("text", "test");
+        data.put("isDeleted", false);
 
         String content = objectMapper.writeValueAsString(data);
 
@@ -127,6 +128,7 @@ public class CommentsApiControllerTest {
         data.put("author", "kyh2");
         data.put("password", "123");
         data.put("text", "test");
+        data.put("isDeleted", false);
 
         String content = objectMapper.writeValueAsString(data);
 
@@ -169,6 +171,7 @@ public class CommentsApiControllerTest {
         data.put("author", "kyh2");
         data.put("password", "123");
         data.put("text", "commentDeleteTest");
+        data.put("isDeleted", false);
 
         String content = objectMapper.writeValueAsString(data);
 
@@ -184,6 +187,7 @@ public class CommentsApiControllerTest {
         // when
         data.clear();
         data.put("password", "123");
+        data.put("isDeleted", true);
         content = objectMapper.writeValueAsString(data);
         mockMvc.perform(post("/api/v1/comments/"  + commentId)
                 .content(content)
