@@ -147,6 +147,47 @@ public class PostApiControllerTest {
     }
 
     @Test
+    @Transactional
+    public void 게시물_파일빈값으로_수정() throws Exception {
+        //when
+        log.info("게시물 수정 시작");
+
+        Map<String,String> updatedData = new HashMap<>();
+        updatedData.put("author", "author");
+        updatedData.put("password", "123");
+        updatedData.put("title", "titleUpdate");
+        updatedData.put("content", "contentUpdate");
+
+        String updatedContent = objectMapper.writeValueAsString(updatedData);
+
+        MockMultipartFile updatedJson = new MockMultipartFile("data", "jsonData", "application/json",
+                updatedContent.getBytes(StandardCharsets.UTF_8));
+
+        log.info("파일 업데이트 시작");
+        // call update API
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/api/v1/posts/" + postId);
+        builder.with(new RequestPostProcessor() {
+            @Override
+            public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+                request.setMethod("PUT");
+                return request;
+            }
+        });
+
+        Long updatedPostId = Long.parseLong(mockMvc.perform(builder.file(updatedJson).contentType("multipart/mixed")
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+
+        Posts post = postsRepository.findById(updatedPostId).orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다." + updatedPostId));
+
+        //then
+        assertThat(updatedData.get("title")).isEqualTo(post.getTitle());
+        assertThat(updatedData.get("content")).isEqualTo(post.getContent());
+        assertThat(post.getFileItem().stream().count()).isEqualTo(0);
+//        assertThat("updatedImage.png").isEqualTo(post.getFileItem().get(0).getOriginFileName());
+//        assertThat("updatedImage2.png").isEqualTo(post.getFileItem().get(1).getOriginFileName());
+    }
+
+    @Test
     public void 게시물삭제() throws Exception {
         //when
         Map<String,String> data = new HashMap<>();
