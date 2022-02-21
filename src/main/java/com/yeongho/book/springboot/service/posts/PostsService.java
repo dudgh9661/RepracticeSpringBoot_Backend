@@ -1,9 +1,6 @@
 package com.yeongho.book.springboot.service.posts;
 
-import com.yeongho.book.springboot.domain.posts.FileItem;
-import com.yeongho.book.springboot.domain.posts.FileRepository;
-import com.yeongho.book.springboot.domain.posts.Posts;
-import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.domain.posts.*;
 import com.yeongho.book.springboot.exception.FileException;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.exception.PostsException;
@@ -30,6 +27,7 @@ public class PostsService {
 
     private final PostsRepository postsRepository;
     private final FileRepository fileRepository;
+    private final CommentsRepository commentsRepository;
 
     @Transactional
     public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
@@ -63,7 +61,6 @@ public class PostsService {
         Posts posts = postsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
         posts.verifyPassword(postsDeleteDto.getPassword());
-//        posts.deleteFile();
         postsRepository.delete(posts);
     }
 
