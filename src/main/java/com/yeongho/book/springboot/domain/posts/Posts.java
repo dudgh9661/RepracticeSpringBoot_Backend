@@ -74,17 +74,19 @@ public class Posts extends BaseTimeEntity {
             } else if (this.getFileItem().isEmpty()) { // server에 저장된 file이 없는 경우
                 saveFile(multipartFiles);
             } else { // 업로드가 필요한 파일만 필터링하여 업로드한다.
-                List<MultipartFile> addMultipartFiles = new ArrayList<>();
+                List<MultipartFile> saveFileItem = new ArrayList<>();
                 List<FileItem> deleteFileItem = new ArrayList<>();
 
                 for (MultipartFile m : multipartFiles) {
-                    String upload = m.getOriginalFilename();
+                    String uploadFileName = m.getOriginalFilename();
+                    boolean findUploadFile = true;
                     for (FileItem fileItem : this.getFileItem()) {
-                        if (!upload.equals(fileItem.getOriginFileName())) {
-                            addMultipartFiles.add(m);
+                        if (uploadFileName.equals(fileItem.getOriginFileName())) {
+                            findUploadFile = false;
                             break;
                         }
                     }
+                    if (findUploadFile) saveFileItem.add(m);
                 }
 
                 for (FileItem fileItem : this.getFileItem()) {
@@ -98,8 +100,9 @@ public class Posts extends BaseTimeEntity {
                     }
                     if (findDeleteFile) deleteFileItem.add(fileItem);
                 }
+
                 deleteFile(deleteFileItem);
-                saveFile(addMultipartFiles);
+                saveFile(saveFileItem);
             }
         }
     }
