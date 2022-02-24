@@ -19,6 +19,7 @@ public class PostsResponseDto {
     private String author;
     private LocalDateTime date;
     private List<FileResponseDto> files;
+    private int liked;
 
     public PostsResponseDto(Posts entity) {
         this.id = entity.getId();
@@ -28,5 +29,6 @@ public class PostsResponseDto {
         this.date = entity.getModifiedDate();
         this.files = entity.getFileItem() == null ? null : entity.getFileItem().stream()
                 .map(FileResponseDto::new).collect(Collectors.toList());
+        this.liked = entity.getLiked();
     }
 }

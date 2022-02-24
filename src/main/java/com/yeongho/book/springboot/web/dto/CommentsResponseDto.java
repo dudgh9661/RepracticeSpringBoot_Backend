@@ -17,6 +17,7 @@ public class CommentsResponseDto {
     private String text;
     private Boolean isDeleted;
     private LocalDateTime modifiedDate;
+    private int liked;
 
     public CommentsResponseDto(Comments comments) {
         this.id = comments.getId();
@@ -25,5 +26,6 @@ public class CommentsResponseDto {
         this.text = comments.getText();
         this.isDeleted = comments.getIsDeleted();
         this.modifiedDate = comments.getModifiedDate();
+        this.liked = comments.getLiked();
     }
 }

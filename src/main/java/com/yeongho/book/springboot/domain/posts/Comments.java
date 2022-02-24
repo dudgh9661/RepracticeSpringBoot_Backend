@@ -43,6 +43,8 @@ public class Comments extends BaseTimeEntity {
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean isDeleted;
 
+    private int liked;
+
     @Builder
     public Comments(Long parentId, Posts post, String author, String password, String text, Boolean isDeleted) {
         this.parentId = parentId;
@@ -51,6 +53,7 @@ public class Comments extends BaseTimeEntity {
         this.password = password;
         this.text = text;
         this.isDeleted = isDeleted;
+        this.liked = 0; // 좋아요 Init
     }
 
     public void update(CommentsUpdateRequestDto requestDto) throws InvalidPasswordException {
@@ -74,5 +77,15 @@ public class Comments extends BaseTimeEntity {
             log.info("사용자가 입력한 비밀번호 불일치");
             throw new InvalidPasswordException();
         }
+    }
+
+    public int addLike() {
+        this.liked++;
+        return this.getLiked();
+    }
+
+    public int deleteLike() {
+        this.liked--;
+        return this.getLiked();
     }
 }
