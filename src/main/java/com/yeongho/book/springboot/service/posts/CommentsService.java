@@ -56,4 +56,24 @@ public class CommentsService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         comments.delete(commentsDeleteDto);
     }
+
+    public int getLiked(Long commentId) {
+        Comments comments = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
+        return comments.getLiked();
+    }
+
+    @Transactional
+    public int addLiked(Long commentId) {
+        Comments comments = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
+        return comments.addLike();
+    }
+
+    @Transactional
+    public int deleteLiked(Long commentId) {
+        Comments comments = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
+        return comments.deleteLike();
+    }
 }

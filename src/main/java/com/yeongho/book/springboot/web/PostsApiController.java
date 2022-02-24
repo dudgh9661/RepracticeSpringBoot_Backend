@@ -54,4 +54,18 @@ public class PostsApiController {
     public ResponseEntity<Resource> fileDownload(@PathVariable Long id) {
         return postsService.fileDownload(id);
     }
+
+    @GetMapping("/api/v1/posts/like/{postId}")
+    public LikedDto getLiked(@PathVariable Long postId) {
+        return new LikedDto(postsService.getLiked(postId));
+    }
+    @PostMapping("/api/v1/posts/like/{postId}")
+    public LikedDto addLiked(@PathVariable Long postId) {
+        return new LikedDto(postsService.addLiked(postId));
+    }
+
+    @DeleteMapping("/api/v1/posts/like/{postId}")
+    public LikedDto deleteLiked(@PathVariable Long postId) {
+        return new LikedDto(postsService.deleteLiked(postId));
+    }
 }

@@ -94,4 +94,24 @@ public class PostsService {
         log.info(searchType + "_검색결과 => " + result.toString());
         return result;
     }
+
+    public int getLiked(Long postId) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
+        return post.getLiked();
+    }
+
+    @Transactional
+    public int addLiked(Long postId) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
+        return post.addLike();
+    }
+
+    @Transactional
+    public int deleteLiked(Long postId) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
+        return post.deleteLike();
+    }
 }

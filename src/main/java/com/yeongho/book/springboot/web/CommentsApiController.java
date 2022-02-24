@@ -2,10 +2,7 @@ package com.yeongho.book.springboot.web;
 
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.service.posts.CommentsService;
-import com.yeongho.book.springboot.web.dto.CommentsDeleteDto;
-import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
-import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
-import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
+import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,5 +39,19 @@ public class CommentsApiController {
     public Long delete(@PathVariable Long commentId, @RequestBody CommentsDeleteDto commentsDeleteDto) throws InvalidPasswordException {
         commentsService.delete(commentId, commentsDeleteDto);
         return commentId;
+    }
+
+    @GetMapping("/api/v1/comments/like/{commentId}")
+    public LikedDto getLiked(@PathVariable Long commentId) {
+        return new LikedDto(commentsService.getLiked(commentId));
+    }
+    @PostMapping("/api/v1/comments/like/{commentId}")
+    public LikedDto addLiked(@PathVariable Long commentId) {
+        return new LikedDto(commentsService.addLiked(commentId));
+    }
+
+    @DeleteMapping("/api/v1/comments/like/{commentId}")
+    public LikedDto deleteLiked(@PathVariable Long commentId) {
+        return new LikedDto(commentsService.deleteLiked(commentId));
     }
 }

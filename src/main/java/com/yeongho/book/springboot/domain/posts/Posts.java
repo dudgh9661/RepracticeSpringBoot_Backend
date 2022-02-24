@@ -11,6 +11,7 @@ import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,12 +54,16 @@ public class Posts extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Comments> comments = new ArrayList<>();
 
+    @Column
+    private int liked;
+
     @Builder
     public Posts(String author, String password, String title, String content) {
         this.author = author;
         this.password = password;
         this.title = title;
         this.content = content;
+        this.liked = 0; // liked init
     }
 
     public void update(String author, String password, String title, String content, List<MultipartFile> multipartFiles) throws FileException, InvalidPasswordException {
@@ -176,5 +181,15 @@ public class Posts extends BaseTimeEntity {
                 this.getFileItem().remove(deleteFileIdx);
             }
         }
+    }
+
+    public int addLike() {
+        this.liked++;
+        return this.getLiked();
+    }
+
+    public int deleteLike() {
+        this.liked--;
+        return this.getLiked();
     }
 }

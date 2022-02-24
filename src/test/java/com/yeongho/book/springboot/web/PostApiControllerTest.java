@@ -258,4 +258,30 @@ public class PostApiControllerTest {
         //then
         assertThat(resultList.size()).isGreaterThan(0);
     }
+
+    @Test
+    public void 좋아요_조회기능() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/like/" + postId)); // like + 1
+        String result = mockMvc.perform(get("/api/v1/posts/like/" + postId)) // get liked count
+                .andReturn().getResponse().getContentAsString();
+        int liked = Integer.parseInt(result);
+
+        assertThat(liked).isEqualTo(1);
+    }
+    @Test
+    public void 좋아요_추가기능() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/like/" + postId));
+        String result = mockMvc.perform(post("/api/v1/posts/like/" + postId)).andReturn().getResponse().getContentAsString();
+        int like = Integer.parseInt(result);
+        assertThat(like).isEqualTo(2);
+    }
+    @Test
+    public void 좋아요_삭제기능() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/like/" + postId)); // 좋아요 추가
+        String result = mockMvc.perform(delete("/api/v1/posts/like/" + postId))
+                .andReturn().getResponse().getContentAsString(); // 좋아요 삭제
+
+        int like = Integer.parseInt(result);
+        assertThat(like).isEqualTo(0);
+    }
 }
