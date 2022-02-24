@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
 import com.yeongho.book.springboot.web.dto.FileResponseDto;
+import com.yeongho.book.springboot.web.dto.LikedDto;
 import com.yeongho.book.springboot.web.dto.PostsListResponseDto;
 import com.yeongho.book.springboot.web.dto.PostsResponseDto;
 import lombok.extern.log4j.Log4j2;
@@ -264,24 +265,28 @@ public class PostApiControllerTest {
         mockMvc.perform(post("/api/v1/posts/like/" + postId)); // like + 1
         String result = mockMvc.perform(get("/api/v1/posts/like/" + postId)) // get liked count
                 .andReturn().getResponse().getContentAsString();
-        int liked = Integer.parseInt(result);
-
-        assertThat(liked).isEqualTo(1);
+        LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
+        log.info("LikeDto ::: ", likedDto.toString());
+        assertThat(likedDto.getLiked()).isEqualTo(1);
     }
+
     @Test
     public void 좋아요_추가기능() throws Exception {
         mockMvc.perform(post("/api/v1/posts/like/" + postId));
         String result = mockMvc.perform(post("/api/v1/posts/like/" + postId)).andReturn().getResponse().getContentAsString();
-        int like = Integer.parseInt(result);
-        assertThat(like).isEqualTo(2);
+        System.out.println("result :" + result);
+        LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
+        log.info("LikeDto ::: " + likedDto.toString());
+        assertThat(likedDto.getLiked()).isEqualTo(2);
     }
+
     @Test
     public void 좋아요_삭제기능() throws Exception {
         mockMvc.perform(post("/api/v1/posts/like/" + postId)); // 좋아요 추가
         String result = mockMvc.perform(delete("/api/v1/posts/like/" + postId))
                 .andReturn().getResponse().getContentAsString(); // 좋아요 삭제
-
-        int like = Integer.parseInt(result);
-        assertThat(like).isEqualTo(0);
+        LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
+        log.info("LikeDto ::: ", likedDto.toString());
+        assertThat(likedDto.getLiked()).isEqualTo(0);
     }
 }
