@@ -175,15 +175,15 @@ public class CommentsApiControllerTest {
 
         String content = objectMapper.writeValueAsString(data);
 
-        String commentStrId = mockMvc.perform(post("/api/v1/comments")
+        String commentObj = mockMvc.perform(post("/api/v1/comments")
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        Long commentId = Long.parseLong(commentStrId);
-
+        CommentsResponseDto commentsResponseDto = objectMapper.readValue(commentObj, CommentsResponseDto.class);
+        Long commentId = commentsResponseDto.getId();
         // when
         data.clear();
         data.put("password", "123");

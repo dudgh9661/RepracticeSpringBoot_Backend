@@ -43,6 +43,7 @@ public class Comments extends BaseTimeEntity {
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean isDeleted;
 
+    @Column
     private int liked;
 
     @Builder
