@@ -35,11 +35,12 @@ public class CommentsService {
     }
 
     @Transactional
-    public Long save(CommentsSaveRequestDto commentsSaveRequestDto) {
+    public CommentsResponseDto save(CommentsSaveRequestDto commentsSaveRequestDto) {
         Long postId = Long.parseLong(commentsSaveRequestDto.getPostId());
         Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
-
-        return commentsRepository.save(commentsSaveRequestDto.toEntity(post)).getId();
+        Comments comment = commentsSaveRequestDto.toEntity(post);
+        commentsRepository.save(comment);
+        return new CommentsResponseDto(comment);
     }
 
     @Transactional

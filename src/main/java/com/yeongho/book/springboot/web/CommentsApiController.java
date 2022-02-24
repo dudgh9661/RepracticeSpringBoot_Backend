@@ -1,5 +1,6 @@
 package com.yeongho.book.springboot.web;
 
+import com.yeongho.book.springboot.domain.posts.Comments;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.service.posts.CommentsService;
 import com.yeongho.book.springboot.web.dto.*;
@@ -24,7 +25,7 @@ public class CommentsApiController {
 
     // 등록
     @PostMapping("/api/v1/comments")
-    public Long save(@RequestBody CommentsSaveRequestDto commentsSaveRequestDto) {
+    public CommentsResponseDto save(@RequestBody CommentsSaveRequestDto commentsSaveRequestDto) {
         return commentsService.save(commentsSaveRequestDto);
     }
 
