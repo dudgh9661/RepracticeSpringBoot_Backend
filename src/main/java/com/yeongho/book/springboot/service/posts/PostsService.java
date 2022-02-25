@@ -3,11 +3,12 @@ package com.yeongho.book.springboot.service.posts;
 import com.yeongho.book.springboot.domain.posts.*;
 import com.yeongho.book.springboot.exception.FileException;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
-import com.yeongho.book.springboot.exception.PostsException;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -54,6 +54,12 @@ public class PostsService {
         return postsRepository.findAll(Sort.by(Sort.Direction.DESC, "createdTime")).stream()
                 .map(PostsListResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PostsListResponseByPagingDto findAllByPage(Pageable pageable) {
+        Page<Posts> postsPage = postsRepository.findAll(pageable);
+        return new PostsListResponseByPagingDto(postsPage);
     }
 
     @Transactional
@@ -94,6 +100,24 @@ public class PostsService {
         log.info(searchType + "_검색결과 => " + result.toString());
         return result;
     }
+
+    public PostsListResponseByPagingDto findByConditionAndPage(Pageable pageable, String searchType, String keyword) {
+        Page<Posts> postsPage = null;
+        switch(searchType) {
+            case "title" :
+                postsPage = postsRepository.findByTitleContaining(pageable, keyword);
+                break;
+            case "content" :
+                postsPage = postsRepository.findByContentContaining(pageable, keyword);
+                break;
+            case "author" :
+                postsPage = postsRepository.findByAuthorContaining(pageable, keyword);
+                break;
+        }
+
+        return new PostsListResponseByPagingDto(postsPage);
+    }
+
 
     public int getLiked(Long postId) {
         Posts post = postsRepository.findById(postId)
