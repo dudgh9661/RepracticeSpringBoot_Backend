@@ -20,6 +20,7 @@ public class PostsResponseDto {
     private LocalDateTime date;
     private List<FileResponseDto> files;
     private int liked;
+    private Long viewCount;
 
     public PostsResponseDto(Posts entity) {
         this.id = entity.getId();
@@ -30,5 +31,6 @@ public class PostsResponseDto {
         this.files = entity.getFileItem() == null ? null : entity.getFileItem().stream()
                 .map(FileResponseDto::new).collect(Collectors.toList());
         this.liked = entity.getLiked();
+        this.viewCount = entity.getViewCount();
     }
 }
