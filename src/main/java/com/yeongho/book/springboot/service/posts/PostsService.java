@@ -44,8 +44,12 @@ public class PostsService {
         return id;
     }
 
+    @Transactional
     public PostsResponseDto findById (Long id) {
         Posts post = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
+        log.info("Before 조회수 : " + post.getViewCount());
+        post.addViewCount();
+        log.info("After 조회수 : " + post.getViewCount());
         return new PostsResponseDto(post); //entity 객체를 넘겨, PostsResponseDto class에서 이를 가공해 response에 필요한 값들만 뽑아 쓸 것이다.
     }
 

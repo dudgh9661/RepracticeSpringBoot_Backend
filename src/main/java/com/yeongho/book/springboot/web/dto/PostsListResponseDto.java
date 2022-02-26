@@ -16,6 +16,7 @@ public class PostsListResponseDto {
     private String author;
     private int liked;
     private LocalDateTime createdDate;
+    private Long viewCount;
 
     public PostsListResponseDto(Posts entity) {
         this.id = entity.getId();
@@ -23,5 +24,6 @@ public class PostsListResponseDto {
         this.author = entity.getAuthor();
         this.liked = entity.getLiked();
         this.createdDate = entity.getCreatedDate();
+        this.viewCount = entity.getViewCount();
     }
 }
