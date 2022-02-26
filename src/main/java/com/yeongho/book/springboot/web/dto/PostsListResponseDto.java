@@ -14,12 +14,14 @@ public class PostsListResponseDto {
     private Long id;
     private String title;
     private String author;
-    private LocalDateTime modifiedDate;
+    private int liked;
+    private LocalDateTime createdDate;
 
     public PostsListResponseDto(Posts entity) {
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.author = entity.getAuthor();
-        this.modifiedDate = entity.getModifiedDate();
+        this.liked = entity.getLiked();
+        this.createdDate = entity.getCreatedDate();
     }
 }
