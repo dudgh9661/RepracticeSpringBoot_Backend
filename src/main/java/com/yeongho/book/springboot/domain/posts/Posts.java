@@ -57,6 +57,9 @@ public class Posts extends BaseTimeEntity {
     @Column
     private int liked;
 
+    @Column
+    private Long viewCount;
+
     @Builder
     public Posts(String author, String password, String title, String content) {
         this.author = author;
@@ -64,6 +67,7 @@ public class Posts extends BaseTimeEntity {
         this.title = title;
         this.content = content;
         this.liked = 0; // liked init
+        this.viewCount = 0L;
     }
 
     public void update(String author, String password, String title, String content, List<MultipartFile> multipartFiles) throws FileException, InvalidPasswordException {
@@ -191,5 +195,9 @@ public class Posts extends BaseTimeEntity {
     public int deleteLike() {
         this.liked--;
         return this.getLiked();
+    }
+
+    public void addViewCount() {
+        this.viewCount++;
     }
 }
