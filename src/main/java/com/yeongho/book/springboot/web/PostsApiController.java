@@ -38,10 +38,10 @@ public class PostsApiController {
         return postsService.findByCondition(searchType, keyword);
     }
 
-    @GetMapping("/api/v2/posts/page/{page}")
+    @GetMapping("/api/v1/posts/page/{page}")
     public PostsListResponseByPagingDto findAllByPage(@PathVariable int page) {
         log.info("findAllByPage() 실행");
-        Pageable pageable = PageRequest.of(page, 3, Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, 10, Sort.Direction.DESC, "id");
         return postsService.findAllByPage(pageable);
     }
 
@@ -49,7 +49,7 @@ public class PostsApiController {
     public PostsListResponseByPagingDto findByConditionAndPage(@PathVariable int page, @RequestParam String searchType, @RequestParam String keyword) {
         log.info("findByConditionAndPage() 실행");
         log.info("pageID : " + page + "searchType : " + searchType + " & keyword : " + keyword);
-        Pageable pageable = PageRequest.of(page, 3, Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, 10, Sort.Direction.DESC, "id");
         return postsService.findByConditionAndPage(pageable, searchType, keyword);
     }
 

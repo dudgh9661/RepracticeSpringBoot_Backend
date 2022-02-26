@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class PostsListResponseByPagingDto {
     private List<PostsListResponseDto> postsList;
-    private int pageNumber;
+    private int currentPageNumber;
     private int totalPage;
     private Long totalElement;
 
     public PostsListResponseByPagingDto(Page<Posts> postsPage) {
         this.postsList = postsPage.getContent()
                 .stream().map(PostsListResponseDto::new).collect(Collectors.toList());
-        this.pageNumber = postsPage.getPageable().getPageNumber();
+        this.currentPageNumber = postsPage.getPageable().getPageNumber();
         this.totalPage = postsPage.getTotalPages();
         this.totalElement = postsPage.getTotalElements();
     }
