@@ -1,5 +1,5 @@
 ## 프로젝트 링크 
-😆 [yummyBoard](http://yummyBoard.site:3000) 
+😆 [yummyBoard](http://yummyBoard.site) 
 
 ## 프로젝트 기능
  
