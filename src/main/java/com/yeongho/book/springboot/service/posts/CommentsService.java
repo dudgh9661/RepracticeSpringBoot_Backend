@@ -1,15 +1,10 @@
 package com.yeongho.book.springboot.service.posts;
 
-import com.yeongho.book.springboot.domain.posts.Comments;
-import com.yeongho.book.springboot.domain.posts.CommentsRepository;
-import com.yeongho.book.springboot.domain.posts.Posts;
-import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.domain.posts.*;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
-import com.yeongho.book.springboot.web.dto.CommentsDeleteDto;
-import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
-import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
-import com.yeongho.book.springboot.web.dto.CommentsUpdateRequestDto;
+import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,13 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class CommentsService {
 
     private final PostsRepository postsRepository;
     private final CommentsRepository commentsRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final LikedCommentsRepository likedCommentsRepository;
 
     @Transactional(readOnly = true)
     public List<CommentsResponseDto> findAll(Long postId) {
@@ -65,16 +61,37 @@ public class CommentsService {
     }
 
     @Transactional
-    public int addLiked(Long commentId) {
-        Comments comments = commentsRepository.findById(commentId)
+    public int addLiked(Long commentId, LikedRequestDto likedRequestDto) {
+        String ip = likedRequestDto.getIp();
+        Long postId = likedRequestDto.getPostId();
+        log.info("Comment addLiked 시작 ::: commentId : " + commentId + " ip : " + ip);
+        // 1. 어떤 게시글의 좋아요 인지 확인한다.
+        Posts post = postsRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        return comments.addLike();
+        // 2. 어떤 댓글인지 확인한다.
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
+        // 3. 어떤 ip인지 확인한다.
+        // 4. likedComments Table에 저장한다.
+        likedCommentsRepository.save(LikedComments.builder()
+                .comment(comment)
+                .ip(ip)
+                .post(post)
+                .build());
+        // 5. 댓글 좋아요를 +1 한다.
+        log.info("Comment deleteLiked 종료");
+        return comment.addLike();
     }
 
     @Transactional
-    public int deleteLiked(Long commentId) {
-        Comments comments = commentsRepository.findById(commentId)
+    public int deleteLiked(Long commentId, String ip) {
+        log.info("Comment deleteLiked 시작 ::: commentId : " + commentId + " ip : " + ip);
+        Comments comment = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        return comments.deleteLike();
+        log.info("deleteLiked comment ::: " + comment);
+        LikedComments likedComments = likedCommentsRepository.findByCommentAndIp(comment, ip).get();
+        likedCommentsRepository.delete(likedComments);
+        log.info("Comment deleteLiked 종료, 삭제된 LikedComments : " + likedComments);
+        return comment.deleteLike();
     }
 }

@@ -15,6 +15,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Log4j2
@@ -45,6 +47,9 @@ public class Comments extends BaseTimeEntity {
 
     @Column
     private int liked;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<LikedComments> LikedComments = new ArrayList<>();
 
     @Builder
     public Comments(Long parentId, Posts post, String author, String password, String text, Boolean isDeleted) {
