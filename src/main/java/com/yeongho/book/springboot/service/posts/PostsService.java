@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -160,7 +161,7 @@ public class PostsService {
         List<CommentsLikedResponseDto> likedCommentList = likedCommentsRepository.findAllByPostAndIp(post, ip)
                 .map(list -> list.stream().map(CommentsLikedResponseDto::new)
                 .collect(Collectors.toList()))
-                .orElse(null);
+                .orElse(Collections.emptyList());
 
         LikedResponseDto likedResponseDto = LikedResponseDto.builder()
                 .isLikedPost(isLikePost)
