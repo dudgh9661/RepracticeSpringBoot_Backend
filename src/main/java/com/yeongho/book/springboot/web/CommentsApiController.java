@@ -46,13 +46,14 @@ public class CommentsApiController {
     public LikedDto getLiked(@PathVariable Long commentId) {
         return new LikedDto(commentsService.getLiked(commentId));
     }
+
     @PostMapping("/api/v1/comments/like/{commentId}")
-    public LikedDto addLiked(@PathVariable Long commentId) {
-        return new LikedDto(commentsService.addLiked(commentId));
+    public LikedDto addLiked(@PathVariable Long commentId, @RequestBody LikedRequestDto likedRequestDto) {
+        return new LikedDto(commentsService.addLiked(commentId, likedRequestDto));
     }
 
-    @DeleteMapping("/api/v1/comments/like/{commentId}")
-    public LikedDto deleteLiked(@PathVariable Long commentId) {
-        return new LikedDto(commentsService.deleteLiked(commentId));
+    @PostMapping("/api/v1/comments/unlike/{commentId}")
+    public LikedDto deleteLiked(@PathVariable Long commentId, @RequestBody LikedRequestDto ip) {
+        return new LikedDto(commentsService.deleteLiked(commentId, ip.getIp()));
     }
 }

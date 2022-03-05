@@ -27,7 +27,8 @@ public class PostsService {
 
     private final PostsRepository postsRepository;
     private final FileRepository fileRepository;
-    private final CommentsRepository commentsRepository;
+    private final LikePostsRepository likePostsRepository;
+    private final LikedCommentsRepository likedCommentsRepository;
 
     @Transactional
     public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
@@ -130,16 +131,43 @@ public class PostsService {
     }
 
     @Transactional
-    public int addLiked(Long postId) {
+    public int addLiked(Long postId, String ip) {
+        log.info("Post addLiked 시작 ::: postsId : " + postId + " ip : " + ip);
         Posts post = postsRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
+        likePostsRepository.save(LikedPosts.builder().post(post).ip(ip).build());
+        log.info("Posts addLiked 종료");
         return post.addLike();
     }
 
     @Transactional
-    public int deleteLiked(Long postId) {
+    public int deleteLiked(Long postId, String ip) {
+        log.info("Post deleteLiked 시작 ::: postsId : " + postId + " ip : " + ip);
         Posts post = postsRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
+        LikedPosts likedPosts = likePostsRepository.findByPostAndIp(post, ip).get();
+        likePostsRepository.delete(likedPosts);
+        log.info("Posts deleteLiked 종료, 삭제된 Like : " + likedPosts);
         return post.deleteLike();
+    }
+
+    public LikedResponseDto getLikeStatus(Long postId, String ip) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
+        boolean isLikePost = likePostsRepository.findByPostAndIp(post, ip).isPresent(); // 게시글 좋아요
+
+        // 해당 게시글의 댓글의 좋아요 리스트
+        List<CommentsLikedResponseDto> likedCommentList = likedCommentsRepository.findAllByPostAndIp(post, ip)
+                .map(list -> list.stream().map(CommentsLikedResponseDto::new)
+                .collect(Collectors.toList()))
+                .orElse(null);
+
+        LikedResponseDto likedResponseDto = LikedResponseDto.builder()
+                .isLikedPost(isLikePost)
+                .likedCommentList(likedCommentList)
+                .build();
+
+        log.info("getLikeStatus :::" + likedResponseDto.toString());
+        return likedResponseDto;
     }
 }

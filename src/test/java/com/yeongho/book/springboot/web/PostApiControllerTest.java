@@ -5,10 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.domain.posts.PostsRepository;
-import com.yeongho.book.springboot.web.dto.FileResponseDto;
-import com.yeongho.book.springboot.web.dto.LikedDto;
-import com.yeongho.book.springboot.web.dto.PostsListResponseDto;
-import com.yeongho.book.springboot.web.dto.PostsResponseDto;
+import com.yeongho.book.springboot.web.dto.*;
 import lombok.extern.log4j.Log4j2;
 import org.junit.After;
 import org.junit.Before;
@@ -262,7 +259,12 @@ public class PostApiControllerTest {
 
     @Test
     public void 좋아요_조회기능() throws Exception {
-        mockMvc.perform(post("/api/v1/posts/like/" + postId)); // like + 1
+        String ip = "127.0.0.1";
+        String content = objectMapper.writeValueAsString(new LikedRequestDto(ip));
+        mockMvc.perform(post("/api/v1/posts/like/" + postId)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)); // like + 1
         String result = mockMvc.perform(get("/api/v1/posts/like/" + postId)) // get liked count
                 .andReturn().getResponse().getContentAsString();
         LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
@@ -272,8 +274,15 @@ public class PostApiControllerTest {
 
     @Test
     public void 좋아요_추가기능() throws Exception {
-        mockMvc.perform(post("/api/v1/posts/like/" + postId));
-        String result = mockMvc.perform(post("/api/v1/posts/like/" + postId)).andReturn().getResponse().getContentAsString();
+        String ip = "127.0.0.1";
+        String content = objectMapper.writeValueAsString(new LikedRequestDto(ip));
+        mockMvc.perform(post("/api/v1/posts/like/" + postId)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+        String result = mockMvc.perform(post("/api/v1/posts/like/" + postId)
+                .content(content).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
         System.out.println("result :" + result);
         LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
         log.info("LikeDto ::: " + likedDto.toString());
