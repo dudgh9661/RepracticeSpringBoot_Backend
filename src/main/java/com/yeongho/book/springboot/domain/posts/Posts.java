@@ -54,6 +54,12 @@ public class Posts extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Comments> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<LikedPosts> likedPosts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<LikedComments> LikedComments = new ArrayList<>();
+
     @Column
     private int liked;
 
@@ -99,6 +105,7 @@ public class Posts extends BaseTimeEntity {
                 }
 
                 for (FileItem fileItem : this.getFileItem()) {
+
                     String deleteFile = fileItem.getOriginFileName();
                     boolean findDeleteFile = true;
                     for (MultipartFile m : multipartFiles) {

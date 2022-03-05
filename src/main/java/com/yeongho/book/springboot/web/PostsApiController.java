@@ -1,16 +1,13 @@
 package com.yeongho.book.springboot.web;
 
-import com.yeongho.book.springboot.domain.posts.Posts;
 import com.yeongho.book.springboot.service.posts.PostsService;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -83,12 +80,17 @@ public class PostsApiController {
         return new LikedDto(postsService.getLiked(postId));
     }
     @PostMapping("/api/v1/posts/like/{postId}")
-    public LikedDto addLiked(@PathVariable Long postId) {
-        return new LikedDto(postsService.addLiked(postId));
+    public LikedDto addLiked(@PathVariable Long postId, @RequestBody LikedRequestDto likedRequestDto) {
+        return new LikedDto(postsService.addLiked(postId, likedRequestDto.getIp()));
     }
 
-    @DeleteMapping("/api/v1/posts/like/{postId}")
-    public LikedDto deleteLiked(@PathVariable Long postId) {
-        return new LikedDto(postsService.deleteLiked(postId));
+    @PostMapping("/api/v1/posts/unlike/{postId}")
+    public LikedDto deleteLiked(@PathVariable Long postId, @RequestBody LikedRequestDto likedRequestDto) {
+        return new LikedDto(postsService.deleteLiked(postId, likedRequestDto.getIp()));
+    }
+
+    @GetMapping("/api/v1/posts/likeStatus/{postId}/ip/{ip}")
+    public LikedResponseDto getLikeStatus(@PathVariable Long postId, @PathVariable String ip) {
+        return postsService.getLikeStatus(postId, ip);
     }
 }
