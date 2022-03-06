@@ -17,6 +17,7 @@ public class PostsListResponseDto {
     private int liked;
     private LocalDateTime createdDate;
     private Long viewCount;
+    private Long commentsLength;
 
     public PostsListResponseDto(Posts entity) {
         this.id = entity.getId();
@@ -25,5 +26,6 @@ public class PostsListResponseDto {
         this.liked = entity.getLiked();
         this.createdDate = entity.getCreatedDate();
         this.viewCount = entity.getViewCount();
+        this.commentsLength = entity.getComments().stream().count();
     }
 }
