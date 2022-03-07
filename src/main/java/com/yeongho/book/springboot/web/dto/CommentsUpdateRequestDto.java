@@ -7,12 +7,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CommentsUpdateRequestDto {
-    private String password;
     private String text;
 
     @Builder
-    public CommentsUpdateRequestDto(String password, String text) {
-        this.password = password;
+    public CommentsUpdateRequestDto(String text) {
         this.text = text;
     }
 }

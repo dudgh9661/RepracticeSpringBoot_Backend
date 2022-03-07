@@ -94,4 +94,10 @@ public class CommentsService {
         log.info("Comment deleteLiked 종료, 삭제된 LikedComments : " + likedComments);
         return comment.deleteLike();
     }
+
+    public boolean verifyPassword(Long commentId, CommentsVerifyPasswordRequestDto commentsVerifyPasswordRequestDto) {
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
+        return comment.verifyPassword(commentsVerifyPasswordRequestDto.getPassword());
+    }
 }

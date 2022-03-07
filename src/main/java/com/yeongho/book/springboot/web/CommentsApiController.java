@@ -56,4 +56,11 @@ public class CommentsApiController {
     public LikedDto deleteLiked(@PathVariable Long commentId, @RequestBody LikedRequestDto ip) {
         return new LikedDto(commentsService.deleteLiked(commentId, ip.getIp()));
     }
+
+    // 댓글 수정 전, 비밀번호를 먼저 검증하기 때문에 필요
+    @PostMapping("/api/v1/comments/verifyPassword/{commentId}")
+    public boolean verifyPassword(@PathVariable Long commentId,
+                                  @RequestBody CommentsVerifyPasswordRequestDto commentsVerifyPasswordRequestDto) {
+        return commentsService.verifyPassword(commentId, commentsVerifyPasswordRequestDto);
+    }
 }
