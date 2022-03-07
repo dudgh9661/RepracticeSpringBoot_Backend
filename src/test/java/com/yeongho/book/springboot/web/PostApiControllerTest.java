@@ -283,7 +283,7 @@ public class PostApiControllerTest {
         String result = mockMvc.perform(post("/api/v1/posts/like/" + postId)
                 .content(content).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
-        System.out.println("result :" + result);
+        log.info("result :" + result);
         LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
         log.info("LikeDto ::: " + likedDto.toString());
         assertThat(likedDto.getLiked()).isEqualTo(2);

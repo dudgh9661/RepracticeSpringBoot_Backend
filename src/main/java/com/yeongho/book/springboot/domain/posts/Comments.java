@@ -63,9 +63,8 @@ public class Comments extends BaseTimeEntity {
     }
 
     public void update(CommentsUpdateRequestDto requestDto) throws InvalidPasswordException {
-        if (verifyPassword(requestDto.getPassword())) {
-            this.text = requestDto.getText();
-        }
+        log.info("comment update text : " + requestDto.getText());
+        this.text = requestDto.getText();
     }
 
     public void delete(CommentsDeleteDto commentsDeleteDto) throws InvalidPasswordException {
