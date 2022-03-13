@@ -1,34 +1,29 @@
 package com.yeongho.book.springboot.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yeongho.book.springboot.domain.posts.Posts;
-import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.domain.posts.Post;
+import com.yeongho.book.springboot.domain.posts.PostRepository;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.extern.log4j.Log4j2;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +41,7 @@ public class PostApiControllerTest {
     private Long postId;
 
     @Autowired
-    private PostsRepository postsRepository;
+    private PostRepository postRepository;
 
 
     @Autowired
@@ -81,21 +76,21 @@ public class PostApiControllerTest {
     }
     @After
     public void clear() throws Exception {
-        postsRepository.deleteAll();
+        postRepository.deleteAll();
     }
 
     @Transactional
     @Test
     public void 게시물등록() throws Exception {
         //when
-        List<Posts> postsList = postsRepository.findAll();
+        List<Post> postList = postRepository.findAll();
 
         //then
-        assertThat("title").isEqualTo(postsList.get(0).getTitle());
-        assertThat("author").isEqualTo(postsList.get(0).getAuthor());
-        assertThat("content").isEqualTo(postsList.get(0).getContent());
-        assertThat("image.png").isEqualTo(postsList.get(0).getFileItem().get(0).getOriginFileName());
-        assertThat("image2.png").isEqualTo(postsList.get(0).getFileItem().get(1).getOriginFileName());
+        assertThat("title").isEqualTo(postList.get(0).getTitle());
+        assertThat("author").isEqualTo(postList.get(0).getAuthor());
+        assertThat("content").isEqualTo(postList.get(0).getContent());
+        assertThat("image.png").isEqualTo(postList.get(0).getFileItem().get(0).getOriginFileName());
+        assertThat("image2.png").isEqualTo(postList.get(0).getFileItem().get(1).getOriginFileName());
     }
 
     @Test
@@ -134,7 +129,7 @@ public class PostApiControllerTest {
         Long updatedPostId = Long.parseLong(mockMvc.perform(builder.file(updatedJson).file(updatedImage).file(updatedImage2).contentType("multipart/mixed")
         .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
-        Posts post = postsRepository.findById(updatedPostId).orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다." + updatedPostId));
+        Post post = postRepository.findById(updatedPostId).orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다." + updatedPostId));
 
         //then
         assertThat(updatedData.get("title")).isEqualTo(post.getTitle());
@@ -175,7 +170,7 @@ public class PostApiControllerTest {
         Long updatedPostId = Long.parseLong(mockMvc.perform(builder.file(updatedJson).contentType("multipart/mixed")
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
-        Posts post = postsRepository.findById(updatedPostId).orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다." + updatedPostId));
+        Post post = postRepository.findById(updatedPostId).orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다." + updatedPostId));
 
         //then
         assertThat(updatedData.get("title")).isEqualTo(post.getTitle());
@@ -189,7 +184,7 @@ public class PostApiControllerTest {
     public void 게시물삭제() throws Exception {
         //when
         Map<String,String> data = new HashMap<>();
-        Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId));
 
         data.clear();
         data.put("password", "123");
@@ -202,7 +197,7 @@ public class PostApiControllerTest {
                 .andExpect(status().isOk());
 
         //then
-        assertThatIllegalArgumentException().isThrownBy(() -> postsRepository.findById(postId)
+        assertThatIllegalArgumentException().isThrownBy(() -> postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 게시물이 존재하지 않습니다." + postId)));
     }
 

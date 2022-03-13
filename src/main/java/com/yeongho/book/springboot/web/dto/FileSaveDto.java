@@ -1,7 +1,7 @@
 package com.yeongho.book.springboot.web.dto;
 
 import com.yeongho.book.springboot.domain.posts.FileItem;
-import com.yeongho.book.springboot.domain.posts.Posts;
+import com.yeongho.book.springboot.domain.posts.Post;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,7 +10,7 @@ public class FileSaveDto {
     private String uniqueFileName;
     private String originFileName;
     private String filePath;
-    private Posts posts;
+    private Post post;
 
     public FileItem toEntity() {
         return FileItem.builder()
@@ -21,10 +21,10 @@ public class FileSaveDto {
     }
 
     @Builder
-    public FileSaveDto(String uniqueFileName, String originFileName, String filePath, Posts posts) {
+    public FileSaveDto(String uniqueFileName, String originFileName, String filePath, Post post) {
         this.uniqueFileName = uniqueFileName;
         this.originFileName = originFileName;
         this.filePath = filePath;
-        this.posts = posts;
+        this.post = post;
     }
 }

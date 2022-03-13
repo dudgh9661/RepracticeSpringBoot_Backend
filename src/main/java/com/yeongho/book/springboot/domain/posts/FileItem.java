@@ -4,7 +4,6 @@ import com.yeongho.book.springboot.exception.FileException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +35,7 @@ public class FileItem {
     private String filePath;
 
     @ManyToOne
-    private Posts post;
+    private Post post;
 
     @Builder
     public FileItem(String uniqueFileName, String originFileName, String filePath) {
@@ -45,7 +44,7 @@ public class FileItem {
         this.filePath = filePath;
     }
 
-    public void setPosts(Posts post) {
+    public void setPosts(Post post) {
         this.post = post;
     }
 
