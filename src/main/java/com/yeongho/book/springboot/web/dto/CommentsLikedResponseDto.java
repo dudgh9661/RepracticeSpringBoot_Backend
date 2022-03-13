@@ -1,6 +1,6 @@
 package com.yeongho.book.springboot.web.dto;
 
-import com.yeongho.book.springboot.domain.posts.LikedComments;
+import com.yeongho.book.springboot.domain.posts.LikeComment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,8 +11,8 @@ import lombok.Setter;
 public class CommentsLikedResponseDto {
     private Long id;
 
-    public CommentsLikedResponseDto(LikedComments likedComments) {
-        this.id = likedComments.getComment().getId();
+    public CommentsLikedResponseDto(LikeComment likeComment) {
+        this.id = likeComment.getComment().getId();
     }
 
 }

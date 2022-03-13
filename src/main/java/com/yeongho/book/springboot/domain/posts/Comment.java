@@ -9,9 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Level;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
@@ -22,7 +19,7 @@ import java.util.List;
 @Log4j2
 @NoArgsConstructor
 @Entity
-public class Comments extends BaseTimeEntity {
+public class Comment extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 댓글 테이블 PK
@@ -31,7 +28,7 @@ public class Comments extends BaseTimeEntity {
     private Long parentId; // 상위 댓글 ID
 
     @ManyToOne
-    private Posts post;
+    private Post post;
 
     @Column(nullable = false)
     private String author;
@@ -49,10 +46,10 @@ public class Comments extends BaseTimeEntity {
     private int liked;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<LikedComments> LikedComments = new ArrayList<>();
+    private List<LikeComment> LikeComment = new ArrayList<>();
 
     @Builder
-    public Comments(Long parentId, Posts post, String author, String password, String text, Boolean isDeleted) {
+    public Comment(Long parentId, Post post, String author, String password, String text, Boolean isDeleted) {
         this.parentId = parentId;
         this.post = post;
         this.author = author;

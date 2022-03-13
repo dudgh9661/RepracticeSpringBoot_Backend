@@ -1,10 +1,8 @@
 package com.yeongho.book.springboot.web.dto;
 
 import com.yeongho.book.springboot.config.WebSecurityConfig;
-import com.yeongho.book.springboot.domain.posts.Posts;
+import com.yeongho.book.springboot.domain.posts.Post;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ToString
@@ -30,9 +28,9 @@ public class PostsSaveRequestDto {
         this.content = content;
     }
 
-    public Posts toEntity() {
+    public Post toEntity() {
         final PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
-        return Posts.builder()
+        return Post.builder()
                 .author(author)
                 .password(passwordEncoder.encode(password))
                 .title(title)

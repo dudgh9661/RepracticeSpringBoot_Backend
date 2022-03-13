@@ -2,10 +2,10 @@ package com.yeongho.book.springboot.web;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yeongho.book.springboot.domain.posts.Comments;
-import com.yeongho.book.springboot.domain.posts.CommentsRepository;
-import com.yeongho.book.springboot.domain.posts.Posts;
-import com.yeongho.book.springboot.domain.posts.PostsRepository;
+import com.yeongho.book.springboot.domain.posts.Comment;
+import com.yeongho.book.springboot.domain.posts.CommentRepository;
+import com.yeongho.book.springboot.domain.posts.Post;
+import com.yeongho.book.springboot.domain.posts.PostRepository;
 import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
 import lombok.extern.log4j.Log4j2;
 import org.junit.After;
@@ -35,13 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class CommentsApiControllerTest {
+public class CommentApiControllerTest {
 
     @Autowired
-    private PostsRepository postsRepository;
+    private PostRepository postRepository;
 
     @Autowired
-    private CommentsRepository commentsRepository;
+    private CommentRepository commentRepository;
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,13 +49,13 @@ public class CommentsApiControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Posts posts;
+    private Post post;
 
     @Before
     public void beforeClear() throws Exception {
         log.info("comment Test 초기화 deleteAll() 시작");
-        commentsRepository.deleteAll();
-        postsRepository.deleteAll();
+        commentRepository.deleteAll();
+        postRepository.deleteAll();
         log.info("comment Test 초기화 deleteAll() 종료");
 
         // 댓글 테스트를 위해 게시글 작성이 선행되어야 한다.
@@ -72,13 +72,13 @@ public class CommentsApiControllerTest {
         mockMvc.perform(multipart("/api/v1/posts").file(json).contentType("multipart/mixed")
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8")).andExpect(status().isOk());
 
-        posts = postsRepository.findAll().get(0);
+        post = postRepository.findAll().get(0);
     }
 
     @After
     public void clear() throws Exception {
-        commentsRepository.deleteAll();
-        postsRepository.deleteAll();
+        commentRepository.deleteAll();
+        postRepository.deleteAll();
     }
 
     @Transactional
@@ -92,7 +92,7 @@ public class CommentsApiControllerTest {
         // 2. Comment 저장 요청
         data.clear();
         data.put("parentId", "0");
-        data.put("postId", posts.getId());
+        data.put("postId", post.getId());
         data.put("author", "kyh2");
         data.put("password", "123");
         data.put("text", "test");
@@ -107,7 +107,7 @@ public class CommentsApiControllerTest {
                 .andExpect(status().isOk());
 
         //then
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/comments/" + posts.getId()))
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/comments/" + post.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -124,7 +124,7 @@ public class CommentsApiControllerTest {
         // 댓글 저장
         Map<String, Object> data = new HashMap<>();
         data.put("parentId", 0);
-        data.put("postId", posts.getId());
+        data.put("postId", post.getId());
         data.put("author", "kyh2");
         data.put("password", "123");
         data.put("text", "test");
@@ -145,18 +145,18 @@ public class CommentsApiControllerTest {
         updatedData.put("text", "updatedComment");
 
         content = objectMapper.writeValueAsString(updatedData);
-        MvcResult mvcResult = mockMvc.perform(put("/api/v1/comments/" + posts.getId())
+        MvcResult mvcResult = mockMvc.perform(put("/api/v1/comments/" + post.getId())
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
                 .andExpect(status().isOk())
                 .andReturn();
         Long commentsId = Long.parseLong(mvcResult.getResponse().getContentAsString());
-        Comments comments = commentsRepository.findById(commentsId)
+        Comment comment = commentRepository.findById(commentsId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다. id : "+ commentsId));
 
         // then
-        assertThat(comments.getText()).isEqualTo("updatedComment");
+        assertThat(comment.getText()).isEqualTo("updatedComment");
     }
 
 
@@ -167,7 +167,7 @@ public class CommentsApiControllerTest {
         // comments save
         Map<String, Object> data = new HashMap<>();
         data.put("parentId", 0);
-        data.put("postId", posts.getId());
+        data.put("postId", post.getId());
         data.put("author", "kyh2");
         data.put("password", "123");
         data.put("text", "commentDeleteTest");
@@ -196,7 +196,7 @@ public class CommentsApiControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        String result = mockMvc.perform(get("/api/v1/comments/" + posts.getId())).andExpect(status().isOk())
+        String result = mockMvc.perform(get("/api/v1/comments/" + post.getId())).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         List<CommentsResponseDto> responseData = objectMapper.readValue(result, new TypeReference<List<CommentsResponseDto>>(){});

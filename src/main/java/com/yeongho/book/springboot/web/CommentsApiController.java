@@ -1,13 +1,11 @@
 package com.yeongho.book.springboot.web;
 
-import com.yeongho.book.springboot.domain.posts.Comments;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.service.posts.CommentsService;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin("*")
