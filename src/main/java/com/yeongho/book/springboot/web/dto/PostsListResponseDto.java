@@ -1,6 +1,6 @@
 package com.yeongho.book.springboot.web.dto;
 
-import com.yeongho.book.springboot.domain.posts.Posts;
+import com.yeongho.book.springboot.domain.posts.Post;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -19,13 +19,13 @@ public class PostsListResponseDto {
     private Long viewCount;
     private Long commentsLength;
 
-    public PostsListResponseDto(Posts entity) {
+    public PostsListResponseDto(Post entity) {
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.author = entity.getAuthor();
         this.liked = entity.getLiked();
         this.createdDate = entity.getCreatedDate();
         this.viewCount = entity.getViewCount();
-        this.commentsLength = entity.getComments().stream().count();
+        this.commentsLength = entity.getCommen().stream().count();
     }
 }

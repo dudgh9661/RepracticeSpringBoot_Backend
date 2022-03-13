@@ -10,20 +10,24 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-public class LikedPosts extends BaseTimeEntity {
+public class LikeComment extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    private Posts post;
+    private Comment comment;
+
+    @ManyToOne
+    private Post post;
 
     @Column(nullable = false)
     private String ip;
 
     @Builder
-    public LikedPosts(Posts post, String ip) {
-        this.post = post;
+    public LikeComment(Comment comment, String ip, Post post) {
+        this.comment = comment;
         this.ip = ip;
+        this.post = post;
     }
 }

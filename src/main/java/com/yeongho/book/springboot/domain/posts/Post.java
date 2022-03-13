@@ -7,30 +7,24 @@ import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Getter
 @Log4j2
 @NoArgsConstructor
 @Entity
-public class Posts extends BaseTimeEntity {
+public class Post extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,13 +46,13 @@ public class Posts extends BaseTimeEntity {
     private List<FileItem> fileItem = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<Comments> comments = new ArrayList<>();
+    private List<Comment> commen = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<LikedPosts> likedPosts = new ArrayList<>();
+    private List<LikePost> likedPosts = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<LikedComments> LikedComments = new ArrayList<>();
+    private List<LikeComment> LikeComment = new ArrayList<>();
 
     @Column
     private int liked;
@@ -67,7 +61,7 @@ public class Posts extends BaseTimeEntity {
     private Long viewCount;
 
     @Builder
-    public Posts(String author, String password, String title, String content) {
+    public Post(String author, String password, String title, String content) {
         this.author = author;
         this.password = password;
         this.title = title;

@@ -1,8 +1,8 @@
 package com.yeongho.book.springboot.web.dto;
 
 import com.yeongho.book.springboot.config.WebSecurityConfig;
-import com.yeongho.book.springboot.domain.posts.Comments;
-import com.yeongho.book.springboot.domain.posts.Posts;
+import com.yeongho.book.springboot.domain.posts.Comment;
+import com.yeongho.book.springboot.domain.posts.Post;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,9 +35,9 @@ public class CommentsSaveRequestDto {
         this.isDeleted = isDeleted;
     }
 
-    public Comments toEntity(Posts post) {
+    public Comment toEntity(Post post) {
         final PasswordEncoder passwordEncoder = new WebSecurityConfig().passwordEncoder();
-        return Comments.builder()
+        return Comment.builder()
                 .parentId(Long.parseLong(parentId))
                 .post(post)
                 .author(author)

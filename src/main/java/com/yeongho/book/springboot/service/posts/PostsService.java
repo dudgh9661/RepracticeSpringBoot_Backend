@@ -26,29 +26,29 @@ import java.util.stream.Collectors;
 @Service
 public class PostsService {
 
-    private final PostsRepository postsRepository;
+    private final PostRepository postRepository;
     private final FileRepository fileRepository;
-    private final LikePostsRepository likePostsRepository;
-    private final LikedCommentsRepository likedCommentsRepository;
+    private final LikePostRepository likePostRepository;
+    private final LikeCommentRepository likeCommentRepository;
 
     @Transactional
     public Long save(PostsSaveRequestDto postsSaveRequestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
-        Posts posts = postsSaveRequestDto.toEntity();
-        posts.saveFile(files);
-        return postsRepository.save(posts).getId();
+        Post post = postsSaveRequestDto.toEntity();
+        post.saveFile(files);
+        return postRepository.save(post).getId();
     }
 
     @Transactional
     public Long update(Long id, PostsUpdateRequestDto requestDto, List<MultipartFile> files) throws FileException, InvalidPasswordException {
-        Posts posts = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id =" + id));
-        posts.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent(), files);
+        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id =" + id));
+        post.update(requestDto.getAuthor(), requestDto.getPassword(), requestDto.getTitle(), requestDto.getContent(), files);
 
         return id;
     }
 
     @Transactional
     public PostsResponseDto findById (Long id) {
-        Posts post = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
+        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
         log.info("Before 조회수 : " + post.getViewCount());
         post.addViewCount();
         log.info("After 조회수 : " + post.getViewCount());
@@ -57,23 +57,23 @@ public class PostsService {
 
     @Transactional(readOnly = true)
     public List<PostsListResponseDto> findAll () {
-        return postsRepository.findAll(Sort.by(Sort.Direction.DESC, "createdTime")).stream()
+        return postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdTime")).stream()
                 .map(PostsListResponseDto::new)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public PostsListResponseByPagingDto findAllByPage(Pageable pageable) {
-        Page<Posts> postsPage = postsRepository.findAll(pageable);
+        Page<Post> postsPage = postRepository.findAll(pageable);
         return new PostsListResponseByPagingDto(postsPage);
     }
 
     @Transactional
     public void delete(Long id, PostsDeleteDto postsDeleteDto) throws FileException, InvalidPasswordException {
-        Posts posts = postsRepository.findById(id)
+        Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
-        posts.verifyPassword(postsDeleteDto.getPassword());
-        postsRepository.delete(posts);
+        post.verifyPassword(postsDeleteDto.getPassword());
+        postRepository.delete(post);
     }
 
     public ResponseEntity<Resource> fileDownload(Long id) throws FileException {
@@ -89,16 +89,16 @@ public class PostsService {
     }
 
     public List<PostsListResponseDto> findByCondition(String searchType, String keyword) {
-        List<Posts> posts = new ArrayList<>();
+        List<Post> posts = new ArrayList<>();
         switch(searchType) {
             case "title" :
-                posts = postsRepository.findByTitleContaining(keyword);
+                posts = postRepository.findByTitleContaining(keyword);
                 break;
             case "content" :
-                posts = postsRepository.findByContentContaining(keyword);
+                posts = postRepository.findByContentContaining(keyword);
                 break;
             case "author" :
-                posts = postsRepository.findByAuthorContaining(keyword);
+                posts = postRepository.findByAuthorContaining(keyword);
                 break;
         }
 
@@ -108,16 +108,16 @@ public class PostsService {
     }
 
     public PostsListResponseByPagingDto findByConditionAndPage(Pageable pageable, String searchType, String keyword) {
-        Page<Posts> postsPage = null;
+        Page<Post> postsPage = null;
         switch(searchType) {
             case "title" :
-                postsPage = postsRepository.findByTitleContaining(pageable, keyword);
+                postsPage = postRepository.findByTitleContaining(pageable, keyword);
                 break;
             case "content" :
-                postsPage = postsRepository.findByContentContaining(pageable, keyword);
+                postsPage = postRepository.findByContentContaining(pageable, keyword);
                 break;
             case "author" :
-                postsPage = postsRepository.findByAuthorContaining(pageable, keyword);
+                postsPage = postRepository.findByAuthorContaining(pageable, keyword);
                 break;
         }
 
@@ -126,7 +126,7 @@ public class PostsService {
 
 
     public int getLiked(Long postId) {
-        Posts post = postsRepository.findById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
         return post.getLiked();
     }
@@ -134,9 +134,9 @@ public class PostsService {
     @Transactional
     public int addLiked(Long postId, String ip) {
         log.info("Post addLiked 시작 ::: postsId : " + postId + " ip : " + ip);
-        Posts post = postsRepository.findById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
-        likePostsRepository.save(LikedPosts.builder().post(post).ip(ip).build());
+        likePostRepository.save(LikePost.builder().post(post).ip(ip).build());
         log.info("Posts addLiked 종료");
         return post.addLike();
     }
@@ -144,21 +144,21 @@ public class PostsService {
     @Transactional
     public int deleteLiked(Long postId, String ip) {
         log.info("Post deleteLiked 시작 ::: postsId : " + postId + " ip : " + ip);
-        Posts post = postsRepository.findById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
-        LikedPosts likedPosts = likePostsRepository.findByPostAndIp(post, ip).get();
-        likePostsRepository.delete(likedPosts);
-        log.info("Posts deleteLiked 종료, 삭제된 Like : " + likedPosts);
+        LikePost likePost = likePostRepository.findByPostAndIp(post, ip).get();
+        likePostRepository.delete(likePost);
+        log.info("Posts deleteLiked 종료, 삭제된 Like : " + likePost);
         return post.deleteLike();
     }
 
     public LikedResponseDto getLikeStatus(Long postId, String ip) {
-        Posts post = postsRepository.findById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
-        boolean isLikePost = likePostsRepository.findByPostAndIp(post, ip).isPresent(); // 게시글 좋아요
+        boolean isLikePost = likePostRepository.findByPostAndIp(post, ip).isPresent(); // 게시글 좋아요
 
         // 해당 게시글의 댓글의 좋아요 리스트
-        List<CommentsLikedResponseDto> likedCommentList = likedCommentsRepository.findAllByPostAndIp(post, ip)
+        List<CommentsLikedResponseDto> likedCommentList = likeCommentRepository.findAllByPostAndIp(post, ip)
                 .map(list -> list.stream().map(CommentsLikedResponseDto::new)
                 .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());

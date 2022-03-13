@@ -1,6 +1,6 @@
 package com.yeongho.book.springboot.web.dto;
 
-import com.yeongho.book.springboot.domain.posts.Posts;
+import com.yeongho.book.springboot.domain.posts.Post;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -22,7 +22,7 @@ public class PostsResponseDto {
     private int liked;
     private Long viewCount;
 
-    public PostsResponseDto(Posts entity) {
+    public PostsResponseDto(Post entity) {
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();

@@ -5,8 +5,6 @@ import com.yeongho.book.springboot.exception.InvalidPasswordException;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +16,14 @@ import java.util.stream.Collectors;
 @Service
 public class CommentsService {
 
-    private final PostsRepository postsRepository;
-    private final CommentsRepository commentsRepository;
-    private final LikedCommentsRepository likedCommentsRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final LikeCommentRepository likeCommentRepository;
 
     @Transactional(readOnly = true)
     public List<CommentsResponseDto> findAll(Long postId) {
-        Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id = " + postId));
-        return commentsRepository.findAllByPost(post).stream()
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id = " + postId));
+        return commentRepository.findAllByPost(post).stream()
                 .map(CommentsResponseDto::new)
                 .collect(Collectors.toList());
     }
@@ -33,31 +31,31 @@ public class CommentsService {
     @Transactional
     public CommentsResponseDto save(CommentsSaveRequestDto commentsSaveRequestDto) {
         Long postId = Long.parseLong(commentsSaveRequestDto.getPostId());
-        Posts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
-        Comments comment = commentsSaveRequestDto.toEntity(post);
-        commentsRepository.save(comment);
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
+        Comment comment = commentsSaveRequestDto.toEntity(post);
+        commentRepository.save(comment);
         return new CommentsResponseDto(comment);
     }
 
     @Transactional
     public Long update(Long commentId, CommentsUpdateRequestDto commentsUpdateRequestDto) throws InvalidPasswordException {
-        Comments comments = commentsRepository.findById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        comments.update(commentsUpdateRequestDto);
+        comment.update(commentsUpdateRequestDto);
         return commentId;
     }
 
     @Transactional
     public void delete(Long commentId, CommentsDeleteDto commentsDeleteDto) throws InvalidPasswordException {
-        Comments comments = commentsRepository.findById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        comments.delete(commentsDeleteDto);
+        comment.delete(commentsDeleteDto);
     }
 
     public int getLiked(Long commentId) {
-        Comments comments = commentsRepository.findById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        return comments.getLiked();
+        return comment.getLiked();
     }
 
     @Transactional
@@ -66,14 +64,14 @@ public class CommentsService {
         Long postId = likedRequestDto.getPostId();
         log.info("Comment addLiked 시작 ::: commentId : " + commentId + " ip : " + ip);
         // 1. 어떤 게시글의 좋아요 인지 확인한다.
-        Posts post = postsRepository.findById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         // 2. 어떤 댓글인지 확인한다.
-        Comments comment = commentsRepository.findById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         // 3. 어떤 ip인지 확인한다.
         // 4. likedComments Table에 저장한다.
-        likedCommentsRepository.save(LikedComments.builder()
+        likeCommentRepository.save(LikeComment.builder()
                 .comment(comment)
                 .ip(ip)
                 .post(post)
@@ -86,17 +84,17 @@ public class CommentsService {
     @Transactional
     public int deleteLiked(Long commentId, String ip) {
         log.info("Comment deleteLiked 시작 ::: commentId : " + commentId + " ip : " + ip);
-        Comments comment = commentsRepository.findById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         log.info("deleteLiked comment ::: " + comment);
-        LikedComments likedComments = likedCommentsRepository.findByCommentAndIp(comment, ip).get();
-        likedCommentsRepository.delete(likedComments);
-        log.info("Comment deleteLiked 종료, 삭제된 LikedComments : " + likedComments);
+        LikeComment likeComment = likeCommentRepository.findByCommentAndIp(comment, ip).get();
+        likeCommentRepository.delete(likeComment);
+        log.info("Comment deleteLiked 종료, 삭제된 LikedComments : " + likeComment);
         return comment.deleteLike();
     }
 
     public boolean verifyPassword(Long commentId, CommentsVerifyPasswordRequestDto commentsVerifyPasswordRequestDto) {
-        Comments comment = commentsRepository.findById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         return comment.verifyPassword(commentsVerifyPasswordRequestDto.getPassword());
     }
