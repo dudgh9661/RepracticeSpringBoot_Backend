@@ -10,7 +10,7 @@
    - **형상 관리** : Git
 
 ### 데이터베이스 스키마
-![erd](./README_image/database-erd.png){: width="150px" height="150px"}
+<img src="./README_image/database-erd.png" width="50%" height="70%" />
 
 ## 프로젝트 기능
  
