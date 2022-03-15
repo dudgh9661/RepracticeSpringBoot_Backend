@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeongho.book.springboot.domain.posts.Post;
 import com.yeongho.book.springboot.domain.posts.PostRepository;
+import com.yeongho.book.springboot.exception.PostsException;
+import com.yeongho.book.springboot.service.posts.PostsService;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.extern.log4j.Log4j2;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.*;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
@@ -27,6 +31,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -43,6 +50,8 @@ public class PostApiControllerTest {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private PostsService postsService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -269,7 +278,10 @@ public class PostApiControllerTest {
 
     @Test
     public void 좋아요_추가기능() throws Exception {
+        // given
         String ip = "127.0.0.1";
+
+        // when
         String content = objectMapper.writeValueAsString(new LikedRequestDto(ip));
         mockMvc.perform(post("/api/v1/posts/like/" + postId)
                 .content(content)
@@ -278,19 +290,112 @@ public class PostApiControllerTest {
         String result = mockMvc.perform(post("/api/v1/posts/like/" + postId)
                 .content(content).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
-        log.info("result :" + result);
+
+        // then
+        Post post = postRepository.findById(postId).orElseThrow(PostsException::new);
         LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
-        log.info("LikeDto ::: " + likedDto.toString());
+        log.info("result :" + result);
+        log.info("LikeDto ::: " + likedDto.getLiked());
         assertThat(likedDto.getLiked()).isEqualTo(2);
+        assertThat(post.getLiked()).isEqualTo(2);
     }
 
     @Test
     public void 좋아요_삭제기능() throws Exception {
-        mockMvc.perform(post("/api/v1/posts/like/" + postId)); // 좋아요 추가
-        String result = mockMvc.perform(delete("/api/v1/posts/like/" + postId))
+        String ip = "127.0.0.1";
+        String content = objectMapper.writeValueAsString(new LikedRequestDto(ip));
+        mockMvc.perform(post("/api/v1/posts/like/" + postId)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+        String result = mockMvc.perform(post("/api/v1/posts/unlike/" + postId)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString(); // 좋아요 삭제
+        log.info("result :" + result);
         LikedDto likedDto = objectMapper.readValue(result, LikedDto.class);
-        log.info("LikeDto ::: ", likedDto.toString());
+        log.info("LikeDto ::: " + likedDto.getLiked());
         assertThat(likedDto.getLiked()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("좋아요 api를 10번 호출하는 경우 좋아요 갯수가 10개가 되어야 한다.")
+    public void 좋아요추가_동시성이슈() throws Exception {
+        // given
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(10);
+
+        // when
+        for (int i = 0; i < 10; i++) {
+            int ip = i;
+            executorService.execute(() -> {
+                try {
+                    String content = objectMapper.writeValueAsString(new LikedRequestDto(Integer.toString(1+ip)));
+
+                    mockMvc.perform(post("/api/v1/posts/like/" + postId)
+                            .content(content)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON));
+                } catch (Exception e) {
+                    log.error(e);
+                }
+                latch.countDown();
+            });
+        }
+        latch.await();
+        executorService.shutdown();
+
+        Post post = postRepository.findById(postId).orElseThrow(PostsException::new);
+        assertThat(post.getLiked()).isEqualTo(10);
+    }
+
+    @Test
+    @DisplayName("좋아요 삭제 api를 5번 호출하는 경우 좋아요 갯수가 0개가 되어야 한다.")
+    public void 좋아요삭제_동시성이슈() throws Exception {
+        // given
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        CountDownLatch latch = new CountDownLatch(5);
+
+        for (int i = 0; i < 5; i++) {
+            int ip = i;
+            executorService.execute(() -> {
+                try {
+                    String content = objectMapper.writeValueAsString(new LikedRequestDto(Integer.toString(1+ip)));
+                    mockMvc.perform(post("/api/v1/posts/like/" + postId)
+                            .content(content)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON));
+                } catch (Exception e) {
+                    log.error(e);
+                }
+                latch.countDown();
+            });
+        }
+        latch.await();
+//        executorService.shutdown();
+
+        // when
+        CountDownLatch deleteLatch = new CountDownLatch(5);
+        for (int i = 0; i < 5; i++) {
+            int ip = i;
+            executorService.execute(() -> {
+                try {
+                    String content = objectMapper.writeValueAsString(new LikedRequestDto(Integer.toString(1+ip)));
+                    mockMvc.perform(post("/api/v1/posts/unlike/" + postId)
+                            .content(content)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON));
+                }  catch (Exception e) {
+                    log.error(e);
+                }
+                deleteLatch.countDown();
+            });
+        }
+        deleteLatch.await();
+        executorService.shutdown();
+
+        Post post = postRepository.findById(postId).orElseThrow(PostsException::new);
+        assertThat(post.getLiked()).isEqualTo(0);
     }
 }
