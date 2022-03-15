@@ -3,6 +3,7 @@ package com.yeongho.book.springboot.service.posts;
 import com.yeongho.book.springboot.domain.posts.*;
 import com.yeongho.book.springboot.exception.FileException;
 import com.yeongho.book.springboot.exception.InvalidPasswordException;
+import com.yeongho.book.springboot.exception.PostsException;
 import com.yeongho.book.springboot.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -134,21 +135,20 @@ public class PostsService {
     @Transactional
     public int addLiked(Long postId, String ip) {
         log.info("Post addLiked 시작 ::: postsId : " + postId + " ip : " + ip);
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
+        Post post = postRepository.findByIdForUpdate(postId)
+                .orElseThrow(PostsException::new);
         likePostRepository.save(LikePost.builder().post(post).ip(ip).build());
-        log.info("Posts addLiked 종료");
         return post.addLike();
     }
 
     @Transactional
     public int deleteLiked(Long postId, String ip) {
         log.info("Post deleteLiked 시작 ::: postsId : " + postId + " ip : " + ip);
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findByIdForUpdate(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. postId = " + postId));
         LikePost likePost = likePostRepository.findByPostAndIp(post, ip).get();
         likePostRepository.delete(likePost);
-        log.info("Posts deleteLiked 종료, 삭제된 Like : " + likePost);
+        log.info("Posts deleteLiked 종료, 삭제된 Like : " + likePost.getPost().getLiked());
         return post.deleteLike();
     }
 
