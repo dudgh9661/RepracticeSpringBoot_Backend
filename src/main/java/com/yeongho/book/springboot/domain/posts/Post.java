@@ -46,7 +46,7 @@ public class Post extends BaseTimeEntity {
     private List<FileItem> fileItem = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<Comment> commen = new ArrayList<>();
+    private List<Comment> comment = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<LikePost> likedPosts = new ArrayList<>();
@@ -189,12 +189,16 @@ public class Post extends BaseTimeEntity {
     }
 
     public int addLike() {
+        log.info("좋아요 추가 전 : " + this.getLiked());
         this.liked++;
+        log.info("좋아요 추가 후 : " + this.getLiked());
         return this.getLiked();
     }
 
     public int deleteLike() {
+        log.info("좋아요 삭제 전 : " + this.getLiked());
         this.liked--;
+        log.info("좋아요 삭제 후 : " + this.getLiked());
         return this.getLiked();
     }
 
