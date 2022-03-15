@@ -72,3 +72,35 @@ Web Browser( + Browser Cache) <-> Web Server
 > max-age가 만료되지 않았기 때문에 Web Browser는 ***Browser Cache에 저장된 이전 데이터***를 받아올 것이다. 
 > 
 > 이런 문제점을 해결하기 위해, 새로운 소스 배포 시 리소스명에 version명을 붙여 배포한다. 이렇게 하면 Web Browser는 새로운 리소스 요청으로 인식하여 새롭게 배포된 소스를 받아오게 된다.
+
+--------
+### 좋아요 기능에서의 동시성 이슈
+:bulb: **좋아요 버튼을 다수의 사용자가 동시에 눌렀을 때 동시성 이슈가 발생할 수 있다**
+
+  > JPA는 객체 조회 시, 영속성 컨텍스트의 1차 캐시에서 데이터를 조회하기 때문에 '일관성 없는 읽기'의 문제가 존재하지 않는다.
+  >
+  > 따라서, 해결해야하는 문제는 'Lost Update'이다.
+
+:pill: 해당 문제를 해결하기 위해서 2가지 방법이 존재한다.
+
+1. Optimistick Lock (낙관적 잠금)
+    - version 컬럼을 이용해 DB data를 update 한다.
+      > A Transaction, B Transaction이 동시에 select로 특정 row를 조회
+      
+      > A Transaction이 해당 row의 특정 column을 update -> version++
+      
+      > B Transaction은 조회했을 때의 version과 A Transaction 이후의 version이 다르게 때문에, update 할 수 없게 됨
+  
+    - @Version을 이용해 구현 가능
+  
+    - Read는 가능, But Write 시점에 충돌 감지 -> 때문에 Transaction Commit까지는 충돌 여부를 알 수 없다.
+    - 충돌 시, ObjectOptimisticLockingFailureException 예외 발생. 개발자가 직접 Rollback을 구현해야 한다.
+    - 활동성은 좋으나, Transaction Commit까지는 충돌 여부를 알 수 없다는 단점이 존재
+    - Transaction 충돌이 거의 발생하지 않고, Read가 많은 곳에 사용하는 것이 적절하다.
+  
+2. Pessimistic Lock (비관적 잠금)
+    - DB의 Lock을 이용해 Entity를 영속상태로 올릴 때부터 다른 Session에서 조회하지 못하도록 잠근다.
+    - 충돌 시, Transaction 성질에 따라 Rollback이 자동으로 일어난다.
+    - 활동성은 낮으나, 정확성이 보장된다.
+    - 트랜잭션 충돌이 빈번한 곳에 사용하는 것이 적절하다.
+
