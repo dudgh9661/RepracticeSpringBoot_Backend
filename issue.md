@@ -1,4 +1,17 @@
-### PasswordEncoder 구현체
+# 목차
+[1. PasswordEncoder 구현체](#passwordencoder-구현체)
+
+[2. @RequestParam vs @PathVariable](#requestparam-vs-pathvariable)
+
+[3. MariaDB를 선택한 이유](#mariadb를-선택한-이유)
+
+[4. HTTP Cache](#http-cache)
+
+[5. 좋아요 기능에서의 동시성 이슈, 어떻게 해결할까?](#좋아요-기능에서의-동시성-이슈-어떻게-해결할까) 
+
+[6. CORS](#cors)
+
+## PasswordEncoder 구현체
 > 기존의 password hashing 전용 알고리즘인 bcrypt나 scrypt 는 컴퓨팅 파워가 지금보다 딸리고 GPU 나 전용 ASIC 으로 병렬 계산이 어려운 시대에 설계되었으므로 새로운 알고리즘이 필요하다.
 
 - Argon2PasswordEncoder
@@ -28,7 +41,7 @@
  [핵심내용](https://d2.naver.com/helloworld/318732)
 
 -------
-### @RequestParam vs @PathVariable
+## @RequestParam vs @PathVariable
 
 1. **@RequestParam**은 query parameters를 추출하기 위해 사용되는 반면, **@PathVariable**은 URI로부터 data를 추출하기 위해 사용된다.
 
@@ -36,7 +49,7 @@
 
 -------
 
-###MariaDB를 선택한 이유
+## MariaDB를 선택한 이유
 1. 가격
     - 상용 데이터베이스인 오라클, MSSQL이 MariaDB, MySQL, PostgreSQL보다 동일 사양 대비 AWS 가격이 더 높다.
     
@@ -50,7 +63,7 @@
     - [MySQL에서 MariaDB로 마이그레이션 해야 할 10가지 이유](https://xdhyix.wordpress.com/2016/03/24/mysql-에서-mariadb-로-마이그레이션-해야할-10가지-이유/)
 
 --------
-### HTTP Cache
+## HTTP Cache
 
 Web Browser( + Browser Cache) <-> Web Server
 
@@ -74,7 +87,7 @@ Web Browser( + Browser Cache) <-> Web Server
 > 이런 문제점을 해결하기 위해, 새로운 소스 배포 시 리소스명에 version명을 붙여 배포한다. 이렇게 하면 Web Browser는 새로운 리소스 요청으로 인식하여 새롭게 배포된 소스를 받아오게 된다.
 
 --------
-## 좋아요 기능에서의 동시성 이슈
+## 좋아요 기능에서의 동시성 이슈, 어떻게 해결할까?
 :bulb: **[#1] 좋아요 추가 / 삭제 동시성 이슈 해결**
 
 
@@ -107,3 +120,38 @@ Web Browser( + Browser Cache) <-> Web Server
     - 활동성은 낮으나, 정확성이 보장된다.
     - 트랜잭션 충돌이 빈번한 곳에 사용하는 것이 적절하다.
 
+## CORS
+> CORS는 **Cross Origin Resource Sharing**의 줄임말이다. Cross Origin, 즉 교차 출처는 '다른 출처'를 의미하는 것이다.
+
+### ❓Origin(출처)? 그게 뭔가요?
+
+  - URL = Protocol + Host + Port + Path + Query String + Fragment
+
+  - Origin은, Protocol + Host + Port 번호를 합친 것을 말한다.
+
+### SOP (Same Origin Policy)
+> 웹 생태계에서는 다른 출처로의 리소스 요청을 제한하는 것과 관련된 2가지 정책이 존재한다. 1. CORS 2. SOP이다.
+>
+> SOP는 처음 등장한 보안 정책으로 ***같은 출처에서만 리소스를 공유할 수 있다***라는 규칙을 가진 정책이다.
+>
+> 그러나 웹이라는 환경에서 다른 출처에 있는 리소스를 가져와 사용하는 일은 굉장히 흔한 일이라 무작정 말을 수는 없으니, **몇가지 예외 사항을 두고 이 예외 사항에 부합하는 리소스 요청은 
+> 출처가 다르더라도 허용**하기로 했는데, 그 중 하나가 바로 **CORS 정책을 지킨 리소스 요청**이다.
+
+우리가 다른 출처로 리소스를 요청한다면 SOP 정책을 위반하게 된 것이고, 거기다 SOP의 예외 사항인 CORS 정책까지 위반한다면 다른 출처의 리소스를 사용할 수 없게 되는 것이다.
+
+### ❓ 그럼 Same Origin 여부는 어떻게 판단하나요?
+ > **Protocol, Host, Port** 이 3가지가 동일하면 된다.
+
+중요한 사실은, Same Origin을 비교하는 로직은 **Browser에 구현되어 있는 스펙**이라는 것이다.
+1. Client에서 CORS 정책을 위반하는 리소스 요청한다.
+2. Server는 정상적으로 응답한다.
+3. Browser가 Server가 보낸 Response Message Header의 **Access-Control-Allow-Origin**과 **Client의 Origin**을 비교한다.
+4. 두 Origin이 Same하면 Client에게 전달. 아니라면 CORS Policy 위반 에러를 뱉는다.
+
+### Preflight Request
+> 본 요청을 보내기 전에 보내는 예비 요청을 Preflight라고 하며, 이 예비 요청에는 HTTP Method 중 **OPTION** Method가 사용된다. 예비 요청의 역할은 본 요청을 보내기 전에 브라우저 스스로 이 요청을 보내는 것이 안전한지를 확인하는 것이다.
+
+1. Clinet가 Server에게 리소스를 요청한다.
+2. Browser는 Preflight Request를 날린다.
+3. Server는 Preflight Request에 대한 응답으로, 현재 자신이 어떤 것들을 허용하고 금지하는지에 대한 정보를 Response Header에 담아 Browser에게 응답한다.
+4. Browser는 응답 헤더의 Access-Control-Allow-Origin과 Client의 Origin을 비교한다.
