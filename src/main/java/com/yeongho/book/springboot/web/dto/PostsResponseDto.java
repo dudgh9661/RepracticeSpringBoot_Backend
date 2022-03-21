@@ -1,16 +1,20 @@
 package com.yeongho.book.springboot.web.dto;
 
+import com.yeongho.book.springboot.domain.posts.Comment;
 import com.yeongho.book.springboot.domain.posts.Post;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @ToString
 @Getter
+@NoArgsConstructor
 public class PostsResponseDto {
 
     private Long id;
@@ -21,6 +25,7 @@ public class PostsResponseDto {
     private List<FileResponseDto> files;
     private int liked;
     private Long viewCount;
+    private List<CommentsResponseDto> commentList = new ArrayList<>();
 
     public PostsResponseDto(Post entity) {
         this.id = entity.getId();
@@ -32,5 +37,6 @@ public class PostsResponseDto {
                 .map(FileResponseDto::new).collect(Collectors.toList());
         this.liked = entity.getLiked();
         this.viewCount = entity.getViewCount();
+        this.commentList = entity.getComment().stream().map(CommentsResponseDto::new).collect(Collectors.toList());
     }
 }
