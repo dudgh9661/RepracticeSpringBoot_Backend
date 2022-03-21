@@ -220,11 +220,11 @@ public class PostApiControllerTest {
         data.put("content", "content");
 
         String content = objectMapper.writeValueAsString(data);
-        MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
-                content.getBytes(StandardCharsets.UTF_8));
+//        MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
+//                content.getBytes(StandardCharsets.UTF_8));
 
         content = objectMapper.writeValueAsString(data);
-        json = new MockMultipartFile("data", "jsonData", "application/json",
+        MockMultipartFile json = new MockMultipartFile("data", "jsonData", "application/json",
                 content.getBytes(StandardCharsets.UTF_8));
 
         mockMvc.perform(multipart("/api/v1/posts").file(json).contentType("multipart/mixed")
