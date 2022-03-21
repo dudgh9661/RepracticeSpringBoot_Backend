@@ -7,10 +7,14 @@ import com.yeongho.book.springboot.domain.posts.CommentRepository;
 import com.yeongho.book.springboot.domain.posts.Post;
 import com.yeongho.book.springboot.domain.posts.PostRepository;
 import com.yeongho.book.springboot.web.dto.CommentsResponseDto;
+import com.yeongho.book.springboot.web.dto.CommentsSaveRequestDto;
+import com.yeongho.book.springboot.web.dto.PostsResponseDto;
+import com.yeongho.book.springboot.web.dto.PostsSaveRequestDto;
 import lombok.extern.log4j.Log4j2;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -201,5 +205,43 @@ public class CommentApiControllerTest {
 
         List<CommentsResponseDto> responseData = objectMapper.readValue(result, new TypeReference<List<CommentsResponseDto>>(){});
         assertThat(responseData.get(0).getIsDeleted()).isEqualTo(true);
+    }
+
+
+
+    @Test
+    @DisplayName("게시글 정보를 불러올 때, 댓글 정보도 함께 불러온다")
+    public void 게시글과_댓글을_한번에_조회된다() throws Exception {
+        // given
+        String postId = Long.toString(post.getId());
+        CommentsSaveRequestDto commentsSaveRequestDto = CommentsSaveRequestDto.builder()
+                .parentId("0")
+                .postId(postId)
+                .author("commentAuthor")
+                .text("commentText")
+                .password("123")
+                .isDeleted(false)
+                .build();
+
+        String content = objectMapper.writeValueAsString(commentsSaveRequestDto);
+
+        mockMvc.perform(post("/api/v1/comments")
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        // when
+        String res = mockMvc.perform(get("/api/v1/posts/" + postId)).andReturn().getResponse().getContentAsString();
+        PostsResponseDto postsResponseDto = objectMapper.readValue(res, PostsResponseDto.class);
+        CommentsResponseDto commentsResponseDto = postsResponseDto.getCommentList().get(0);
+        // then
+        assertThat(postsResponseDto.getAuthor()).isEqualTo("kyh");
+        assertThat(postsResponseDto.getContent()).isEqualTo("test");
+        assertThat(postsResponseDto.getTitle()).isEqualTo("post");
+
+        assertThat(commentsResponseDto.getAuthor()).isEqualTo("commentAuthor");
+        assertThat(commentsResponseDto.getText()).isEqualTo("commentText");
     }
 }
