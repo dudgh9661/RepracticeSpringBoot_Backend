@@ -4,6 +4,7 @@ import com.yeongho.book.springboot.exception.FileException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -53,7 +54,7 @@ public class FileItem {
         String contentType = Files.probeContentType(path);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-        Resource resource = new InputStreamResource(Files.newInputStream(path));
+        Resource resource = new ByteArrayResource(Files.readAllBytes(path));
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 }
