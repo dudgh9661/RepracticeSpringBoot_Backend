@@ -52,6 +52,7 @@ public class Comment extends BaseTimeEntity {
     public Comment(Long parentId, Post post, String author, String password, String text, Boolean isDeleted) {
         this.parentId = parentId;
         this.post = post;
+        this.post.getComment().add(this);
         this.author = author;
         this.password = password;
         this.text = text;

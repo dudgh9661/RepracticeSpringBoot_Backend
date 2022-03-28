@@ -25,4 +25,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = "select p from Post p where p.id = :id")
     Optional<Post> findByIdForUpdate(@Param("id") Long id);
+
+    // N+1 문제 해결
+    @Query("select p from Post p left join fetch p.comment where p.id = :id")
+    Optional<Post> findById(@Param("id") Long id);
 }
