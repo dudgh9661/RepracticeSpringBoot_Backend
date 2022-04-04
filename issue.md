@@ -11,6 +11,8 @@
 
 [6. CORS](#cors)
 
+[7. Spring Security를 쓴 이유](#spring-security를-쓴-이유)
+
 ## PasswordEncoder 구현체
 > 기존의 password hashing 전용 알고리즘인 bcrypt나 scrypt 는 컴퓨팅 파워가 지금보다 딸리고 GPU 나 전용 ASIC 으로 병렬 계산이 어려운 시대에 설계되었으므로 새로운 알고리즘이 필요하다.
 
