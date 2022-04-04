@@ -11,6 +11,8 @@
 
 [6. CORS](#cors)
 
+[7. Spring Security를 쓴 이유](#spring-security를-쓴-이유)
+
 ## PasswordEncoder 구현체
 > 기존의 password hashing 전용 알고리즘인 bcrypt나 scrypt 는 컴퓨팅 파워가 지금보다 딸리고 GPU 나 전용 ASIC 으로 병렬 계산이 어려운 시대에 설계되었으므로 새로운 알고리즘이 필요하다.
 
@@ -155,3 +157,22 @@ Web Browser( + Browser Cache) <-> Web Server
 2. Browser는 Preflight Request를 날린다.
 3. Server는 Preflight Request에 대한 응답으로, 현재 자신이 어떤 것들을 허용하고 금지하는지에 대한 정보를 Response Header에 담아 Browser에게 응답한다.
 4. Browser는 응답 헤더의 Access-Control-Allow-Origin과 Client의 Origin을 비교한다.
+
+## Spring Security를 쓴 이유
+패스워드 encoding을 위한 Interface인 PasswordEncoder를 쓰기 위해선, Spring Security 의존성이 필요하다.
+
+> Spring Security 의존성을 추가하게 되면, default로 Login form이 활성화된다. 때문에 어떤 URL로 접근해도 /login으로 redirect된다.
+>
+> 본 서비스는 ***로그인이 필요없는 익명 게시판***이므로 Login form을 disable 하기 위한 Spring Security 설정이 필요하다.
+
+### Spring Security 환경설정
+
+#### cors()
+- CORS Policy에 대한 환경설정을 한다.
+- CORS란, [6. CORS](#cors) 참고
+
+#### csrf()
+- Cross Site Request Forgery, 사이트간 요청 위조
+- 정상적인 사용자의 요청을 해커가 위조하여 서버로 위조 요청을 보내는 것을 의미한다.
+- csrf 토큰이 포함된 요청만을 서버가 처리하도록 하여, 위조 요청을 방지할 수 있다.
+- 본 서비스에서는 요청 위조로 인한 심각한 문제가 발생할 요인이 없으므로 disable() 처리한다.
