@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Log4j2
-@CrossOrigin("*")
 @RequiredArgsConstructor
 @RestController
 public class PostsApiController {
