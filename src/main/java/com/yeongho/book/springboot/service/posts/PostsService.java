@@ -70,10 +70,10 @@ public class PostsService {
     }
 
     @Transactional
-    public void delete(Long id, PostsDeleteDto postsDeleteDto) throws FileException, InvalidPasswordException {
+    public void delete(Long id, String password) throws FileException, InvalidPasswordException {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id = " + id));
-        post.verifyPassword(postsDeleteDto.getPassword());
+        post.verifyPassword(password);
         postRepository.delete(post);
     }
 
