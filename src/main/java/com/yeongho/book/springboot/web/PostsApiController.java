@@ -64,9 +64,9 @@ public class PostsApiController {
         return postsService.findById(id);
     }
 
-    @PostMapping("/api/v1/posts/{id}")
-    public void delete(@PathVariable Long id, @RequestBody PostsDeleteDto postsDeleteDto) {
-        postsService.delete(id, postsDeleteDto);
+    @DeleteMapping("/api/v1/posts/{id}")
+    public void delete(@PathVariable Long id, @RequestHeader(value="password") String password) {
+        postsService.delete(id, password);
     }
 
     @GetMapping("/api/v1/posts/download/{id}")
